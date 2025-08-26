@@ -1,7 +1,6 @@
 <script setup>
-import Colyseus from 'colyseus.js'
-import { Application, Container, Graphics, Text } from 'pixi.js'
-import { onMounted, ref, useTemplateRef, onUnmounted } from 'vue'
+import { ref, useTemplateRef, onMounted, onUnmounted } from 'vue'
+import { Game } from '@/engine/Game'
 
 const gameUI = useTemplateRef('gameUI')
 const mainInput = useTemplateRef('mainInput')
@@ -9,132 +8,48 @@ const mainInput = useTemplateRef('mainInput')
 const gameStarted = ref(false)
 const playerName = ref('anon')
 const command = ref('')
-const playerContainers = new Map()
-const playerTargetPositions = new Map()
-const app = new Application()
-let room
-let animationFrameId
 
-onMounted(async () => {
-  await createGameUI()
-  startAnimationLoop()
+// Game instance
+let game = null
+
+onMounted(() => {
+  // Initialize game when component is mounted
+  if (gameUI.value) {
+    game = new Game(gameUI.value)
+  }
 })
 
 onUnmounted(() => {
-  if (animationFrameId) {
-    cancelAnimationFrame(animationFrameId)
+  // Clean up game resources when component is unmounted
+  if (game) {
+    game.destroy()
+    game = null
   }
 })
 
-function lerp(start, end, t) {
-  return start + (end - start) * t
-}
-
-function startAnimationLoop() {
-  const updateFrame = () => {
-    for (const [id, container] of playerContainers) {
-      if (playerTargetPositions.has(id)) {
-        const target = playerTargetPositions.get(id)
-        container.x = lerp(container.x, target.x, 0.1)
-        container.y = lerp(container.y, target.y, 0.1)
-      }
-    }
-
-    animationFrameId = requestAnimationFrame(updateFrame)
-  }
-
-  animationFrameId = requestAnimationFrame(updateFrame)
-}
-
 async function connectToRoom() {
-  mainInput.value.focus()
-  const client = new Colyseus.Client('ws://localhost:2567')
-  room = await client.joinOrCreate('arena', {
-    name: playerName.value,
-    color: Math.floor(Math.random() * 0xffffff),
-  })
+  if (!game) return
 
-  console.log('joined successfully', room)
-  gameStarted.value = true
+  try {
+    // Connect to the game server
+    await game.connectToServer('ws://localhost:2567', playerName.value)
 
-  room.onStateChange((state) => {
-    renderPlayers(state.players)
-  })
-}
+    // Focus the input field
+    mainInput.value.focus()
 
-async function createGameUI() {
-  await app.init({ background: '#1b2e49', resizeTo: window })
-  gameUI.value.appendChild(app.canvas)
-}
-
-function renderPlayers(players) {
-  // Remove players that no longer exist
-  for (const [id, container] of playerContainers) {
-    if (!players.has(id)) {
-      app.stage.removeChild(container)
-      playerContainers.delete(id)
-      playerTargetPositions.delete(id)
-    }
-  }
-
-  for (const [id, player] of players) {
-    if (!playerContainers.has(id)) {
-      // Create new player container for first appearance
-      const playerContainer = new Container()
-      // Set initial position directly (no interpolation needed for first appearance)
-      playerContainer.x = player.x
-      playerContainer.y = player.y
-
-      const circle = new Graphics()
-      circle.circle(0, 0, 20)
-      circle.fill(player.color)
-      playerContainer.addChild(circle)
-
-      const text = new Text({
-        text: player.name,
-        style: {
-          fontFamily: 'Arial',
-          fontSize: 14,
-          fill: 0xffffff,
-        },
-      })
-      text.x = -(playerContainer.width / 2) + 5
-      text.y = -playerContainer.height
-      playerContainer.addChild(text)
-
-      const message = new Text({
-        text: '',
-        style: {
-          fontFamily: 'Arial',
-          fontSize: 10,
-          fill: 0x34ffff,
-          wordWrap: true,
-        },
-      })
-      message.x = playerContainer.width - 10
-      message.y = -5
-      playerContainer.addChild(message)
-
-      app.stage.addChild(playerContainer)
-
-      playerContainers.set(id, playerContainer)
-      // Initialize target position to match current position
-      playerTargetPositions.set(id, { x: player.x, y: player.y })
-    } else {
-      // For existing players, update the target position instead of directly setting position
-      // The animation loop will handle the smooth transition
-      playerTargetPositions.set(id, { x: player.x, y: player.y })
-    }
-
-    const playerContainer = playerContainers.get(id)
-    // Update message text directly (no need for smooth transition)
-    playerContainer.children[2].text = player.message ?? ''
+    // Update UI state
+    gameStarted.value = true
+  } catch (error) {
+    console.error('Failed to connect to server:', error)
   }
 }
 
 function handleCommand() {
-  room.send('command', command.value)
-  command.value = ''
+  if (game) {
+    // Send command to the server
+    game.sendCommand(command.value)
+    command.value = ''
+  }
 }
 </script>
 
