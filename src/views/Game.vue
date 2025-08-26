@@ -1,22 +1,50 @@
 <script setup>
 import Colyseus from 'colyseus.js'
 import { Application, Container, Graphics, Text } from 'pixi.js'
-import { onMounted, ref, useTemplateRef } from 'vue'
+import { onMounted, ref, useTemplateRef, onUnmounted } from 'vue'
 
 const gameUI = useTemplateRef('gameUI')
 const mainInput = useTemplateRef('mainInput')
 
 const gameStarted = ref(false)
 const playerName = ref('anon')
-let playerIndex = ''
 const command = ref('')
 const playerContainers = new Map()
+const playerTargetPositions = new Map()
 const app = new Application()
 let room
+let animationFrameId
 
 onMounted(async () => {
   await createGameUI()
+  startAnimationLoop()
 })
+
+onUnmounted(() => {
+  if (animationFrameId) {
+    cancelAnimationFrame(animationFrameId)
+  }
+})
+
+function lerp(start, end, t) {
+  return start + (end - start) * t
+}
+
+function startAnimationLoop() {
+  const updateFrame = () => {
+    for (const [id, container] of playerContainers) {
+      if (playerTargetPositions.has(id)) {
+        const target = playerTargetPositions.get(id)
+        container.x = lerp(container.x, target.x, 0.1)
+        container.y = lerp(container.y, target.y, 0.1)
+      }
+    }
+
+    animationFrameId = requestAnimationFrame(updateFrame)
+  }
+
+  animationFrameId = requestAnimationFrame(updateFrame)
+}
 
 async function connectToRoom() {
   mainInput.value.focus()
@@ -25,7 +53,6 @@ async function connectToRoom() {
     name: playerName.value,
     color: Math.floor(Math.random() * 0xffffff),
   })
-  playerIndex = room.sessionId
 
   console.log('joined successfully', room)
   gameStarted.value = true
@@ -41,16 +68,20 @@ async function createGameUI() {
 }
 
 function renderPlayers(players) {
+  // Remove players that no longer exist
   for (const [id, container] of playerContainers) {
     if (!players.has(id)) {
       app.stage.removeChild(container)
       playerContainers.delete(id)
+      playerTargetPositions.delete(id)
     }
   }
 
   for (const [id, player] of players) {
     if (!playerContainers.has(id)) {
+      // Create new player container for first appearance
       const playerContainer = new Container()
+      // Set initial position directly (no interpolation needed for first appearance)
       playerContainer.x = player.x
       playerContainer.y = player.y
 
@@ -87,12 +118,16 @@ function renderPlayers(players) {
       app.stage.addChild(playerContainer)
 
       playerContainers.set(id, playerContainer)
+      // Initialize target position to match current position
+      playerTargetPositions.set(id, { x: player.x, y: player.y })
+    } else {
+      // For existing players, update the target position instead of directly setting position
+      // The animation loop will handle the smooth transition
+      playerTargetPositions.set(id, { x: player.x, y: player.y })
     }
 
     const playerContainer = playerContainers.get(id)
-    playerContainer.x = player.x
-    playerContainer.y = player.y
-
+    // Update message text directly (no need for smooth transition)
     playerContainer.children[2].text = player.message ?? ''
   }
 }
