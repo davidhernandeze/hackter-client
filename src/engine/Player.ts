@@ -6,8 +6,8 @@ import { Entity } from './Entity';
  * Handles player-specific properties and rendering
  */
 export class Player extends Entity {
-  private name: string;
-  private color: number;
+  private readonly name: string;
+  private readonly color: number;
   private message: string = '';
   private nameText: Text;
   private messageText: Text;

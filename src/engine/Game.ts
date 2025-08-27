@@ -34,6 +34,9 @@ export class Game {
   // Callback for game state changes
   private onStateChangeCallback: (() => void) | null = null
 
+  // Flag to track if current player is deleted
+  private isCurrentPlayerDeleted: boolean = false
+
   constructor(canvas: HTMLCanvasElement) {
     // Initialize PIXI Application
     this.app = new Application()
@@ -231,6 +234,11 @@ export class Game {
       if (!serverPlayers.has(id)) {
         this.worldContainer.removeChild(player.getContainer())
         this.players.delete(id)
+
+        // Check if the deleted player is the current player
+        if (id === this.sessionId) {
+          this.isCurrentPlayerDeleted = true
+        }
       }
     }
 
@@ -299,6 +307,13 @@ export class Game {
    */
   getPlayers(): Map<string, Player> {
     return this.players
+  }
+
+  /**
+   * Check if current player is deleted
+   */
+  isPlayerDeleted(): boolean {
+    return this.isCurrentPlayerDeleted
   }
 
   /**
