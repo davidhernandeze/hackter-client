@@ -36,6 +36,7 @@ export class Player extends Entity {
     const circle = new Graphics();
     circle.circle(0, 0, 20);
     circle.fill(this.color);
+    circle.stroke({ color: 'white', pixelLine: true });
     this.container.addChild(circle);
 
     // Create player name text

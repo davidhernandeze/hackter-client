@@ -67,8 +67,8 @@ export class Game {
 
     // Set grid properties
     const gridSize = 50 // Size of each grid cell
-    const gridWidth = 5000 // Total width of the grid
-    const gridHeight = 5000 // Total height of the grid
+    const gridWidth = 100000 // Total width of the grid
+    const gridHeight = 100000 // Total height of the grid
     const gridColor = 0x2a3f5f // Slightly lighter than the background
 
     // Draw vertical lines
@@ -206,13 +206,13 @@ export class Game {
       for (let i = 2; i < mapVertices.length; i += 2) {
         if (i + 1 < mapVertices.length) {
           this.mapPolygon.lineTo(mapVertices[i], mapVertices[i + 1])
-          this.mapPolygon.stroke({ color: 'red', pixelLine: true, width: 2 })
+          this.mapPolygon.stroke({ color: 'green', width: 4})
         }
       }
 
       // Close the polygon
       this.mapPolygon.lineTo(mapVertices[0], mapVertices[1])
-      this.gridGraphics.stroke({ color: 'red', pixelLine: true, width: 2 })
+      this.gridGraphics.stroke({ color: 'green', width: 4 })
     }
 
     // End the fill
