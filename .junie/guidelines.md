@@ -119,6 +119,7 @@ describe('Game Component', () => {
 - Prettier is configured for code formatting
 - Run linting with `npm run lint`
 - Run formatting with `npm run format`
+- No comments are allowed in the codebase
 
 ### Project Structure
 

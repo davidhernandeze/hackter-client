@@ -1,7 +1,8 @@
 <script setup>
 import { ref, useTemplateRef, onMounted, onUnmounted } from 'vue'
 import { Game } from '@/engine/Game'
-import UsernameUI from '@/components/UsernameUI.vue'
+import { useStorage } from '@vueuse/core'
+import router from '@/router/index.js'
 
 const gameUI = useTemplateRef('gameUI')
 const mainInput = useTemplateRef('mainInput')
@@ -9,105 +10,60 @@ const mainInput = useTemplateRef('mainInput')
 const gameStarted = ref(false)
 const gameOver = ref(false)
 const command = ref('')
-const connectionStatus = ref('')
 const isConnecting = ref(false)
 
-// Game instance
 let game = null
+const playerName = useStorage('username', 'anon')
 
-onMounted(() => {
-  // Initialize game when component is mounted
-  if (gameUI.value) {
-    game = new Game(gameUI.value)
-  }
+onMounted(async () => {
+  game = new Game(gameUI.value)
+  mainInput.value.focus()
+  await connectToRoom()
 })
 
 onUnmounted(() => {
-  // Clean up game resources when component is unmounted
   if (game) {
     game.destroy()
     game = null
   }
 })
 
-async function connectToRoom(playerName) {
-  if (!game || isConnecting.value) return
-
+async function connectToRoom() {
   try {
-    isConnecting.value = true
+    await game.connectToServer('ws://localhost:2567', playerName.value)
 
-    // Update connection status messages with delays for dramatic effect
-    connectionStatus.value = 'Initializing secure connection...'
-
-    setTimeout(() => {
-      connectionStatus.value = 'Authenticating user credentials...'
-    }, 800)
-
-    setTimeout(() => {
-      connectionStatus.value = 'Establishing encrypted channel...'
-    }, 1600)
-
-    setTimeout(() => {
-      connectionStatus.value = 'Bypassing security protocols...'
-    }, 2400)
-
-    // Connect to the game server after a delay for visual effect
-    setTimeout(async () => {
-      try {
-        connectionStatus.value = 'Connection established. Entering system...'
-        await game.connectToServer('ws://localhost:2567', playerName)
-
-        // Set up state change handler to check for player deletion
-        game.onStateChange(() => {
-          if (game.isPlayerDeleted()) {
-            gameOver.value = true
-          }
-        })
-
-        setTimeout(() => {
-          gameStarted.value = true
-          mainInput.value.focus()
-          isConnecting.value = false
-          connectionStatus.value = ''
-        }, 1000)
-      } catch (error) {
-        console.error('Failed to connect to server:', error)
-        connectionStatus.value = 'Connection failed. Security breach detected.'
-        isConnecting.value = false
+    game.onStateChange(() => {
+      if (game.isPlayerDeleted()) {
+        console.log('Player has been deleted from the server.')
+        gameOver.value = true
+        game.destroy()
+        game = null
       }
-    }, 10)
+    })
   } catch (error) {
     console.error('Failed to connect to server:', error)
-    connectionStatus.value = 'Connection failed. Security breach detected.'
     isConnecting.value = false
   }
 }
 
 function handleCommand() {
   if (game) {
-    // Send command to the server
     game.sendCommand(command.value)
     command.value = ''
   }
 }
 
 function backToLogin() {
-  // Reset game state
-  if (game) {
-    game.destroy()
-    game = new Game(gameUI.value)
-  }
-
-  // Reset UI state
   gameOver.value = false
   gameStarted.value = false
   command.value = ''
+  router.replace({ name: 'login' })
 }
 </script>
 
 <template>
   <main>
-    <div v-show="gameStarted && !gameOver">
+    <div v-if="!gameOver">
       <div ref="gameUI" />
       <div
         style="
@@ -147,21 +103,6 @@ function backToLogin() {
         </ul>
       </div>
     </div>
-    <div v-show="!gameStarted">
-      <UsernameUI
-        :isConnecting="isConnecting"
-        @connect="connectToRoom"
-      >
-        <template #status>
-          <p class="status-message">{{ connectionStatus }}</p>
-          <div class="loading-indicator">
-            <span></span><span></span><span></span>
-          </div>
-        </template>
-      </UsernameUI>
-    </div>
-
-    <!-- Game Over Screen -->
     <div v-show="gameOver" class="game-over-container">
       <div class="terminal-window">
         <div class="terminal-header">

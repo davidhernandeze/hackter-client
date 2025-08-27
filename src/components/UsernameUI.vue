@@ -1,17 +1,22 @@
 <script setup>
-import { ref } from 'vue'
+import { onMounted, ref, useTemplateRef } from 'vue'
 
 const props = defineProps({
   isConnecting: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
 
 const emit = defineEmits(['connect'])
 
-const playerName = ref('anon')
+const playerName = defineModel('playerName')
 const typingEffect = ref(false)
+const playerNameInput = useTemplateRef('playerNameInput')
+
+onMounted(() => {
+  playerNameInput.value.focus()
+})
 
 // Simulate terminal typing effect
 function startTypingEffect() {
@@ -23,7 +28,8 @@ function startTypingEffect() {
 
 function connectToRoom() {
   if (props.isConnecting) return
-  emit('connect', playerName.value)
+  if (playerName.value.trim() === '') return
+  emit('connect')
 }
 </script>
 
@@ -46,8 +52,8 @@ function connectToRoom() {
 | |  | |   /\   / ____| |/ /_   _|  ____|  __ \
 | |__| |  /  \ | |    | ' /  | | | |__  | |__) |
 |  __  | / /\ \| |    |  &lt;   | | |  __| |  _  /
-| |  | |/ ____ \ |____| . \ _| |_| |____| | \ \
-|_|  |_/_/    \_\_____|_|\_\_____|______|_|  \_\
+| |  | |/ ____ \ |____| . \  | | | |____| | \ \
+|_|  |_/_/    \_\_____|_|\_\ |_| |______|_|  \_\
             </pre>
           </div>
           <p class="blink">SYSTEM INITIALIZED</p>
@@ -57,12 +63,12 @@ function connectToRoom() {
           <div class="input-line">
             <span class="prompt">$</span>
             <input
+              ref="playerNameInput"
               v-model="playerName"
               class="terminal-input"
-              placeholder="anonymous"
               @focus="startTypingEffect"
               @keyup.enter="!props.isConnecting && connectToRoom()"
-              :class="{ 'typing': typingEffect }"
+              :class="{ typing: typingEffect }"
             />
           </div>
           <div class="connection-status" v-if="$slots.status">
@@ -72,7 +78,7 @@ function connectToRoom() {
             @click="connectToRoom"
             class="terminal-button-connect"
             :disabled="props.isConnecting"
-            :class="{ 'connecting': props.isConnecting }"
+            :class="{ connecting: props.isConnecting }"
           >
             <span class="button-text">{{ props.isConnecting ? 'CONNECTING...' : 'CONNECT' }}</span>
             <span class="button-glitch"></span>
@@ -102,7 +108,9 @@ function connectToRoom() {
   max-width: 800px;
   background-color: #0c0c14;
   border-radius: 8px;
-  box-shadow: 0 0 20px rgba(0, 255, 255, 0.2), 0 0 30px rgba(0, 0, 0, 0.4);
+  box-shadow:
+    0 0 20px rgba(0, 255, 255, 0.2),
+    0 0 30px rgba(0, 0, 0, 0.4);
   overflow: hidden;
   border: 1px solid #30cfd0;
   animation: borderPulse 4s infinite;
@@ -305,31 +313,56 @@ function connectToRoom() {
 
 @keyframes borderPulse {
   0% {
-    box-shadow: 0 0 10px rgba(48, 207, 208, 0.5), 0 0 20px rgba(0, 0, 0, 0.4);
+    box-shadow:
+      0 0 10px rgba(48, 207, 208, 0.5),
+      0 0 20px rgba(0, 0, 0, 0.4);
   }
   50% {
-    box-shadow: 0 0 15px rgba(48, 207, 208, 0.8), 0 0 30px rgba(0, 0, 0, 0.4);
+    box-shadow:
+      0 0 15px rgba(48, 207, 208, 0.8),
+      0 0 30px rgba(0, 0, 0, 0.4);
   }
   100% {
-    box-shadow: 0 0 10px rgba(48, 207, 208, 0.5), 0 0 20px rgba(0, 0, 0, 0.4);
+    box-shadow:
+      0 0 10px rgba(48, 207, 208, 0.5),
+      0 0 20px rgba(0, 0, 0, 0.4);
   }
 }
 
 @keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
 }
 
 @keyframes typing {
-  from { width: 0; }
-  to { width: 80%; }
+  from {
+    width: 0;
+  }
+  to {
+    width: 80%;
+  }
 }
 
 @keyframes glitch {
-  0% { transform: translateX(0); }
-  25% { transform: translateX(100%); }
-  50% { transform: translateX(200%); }
-  75% { transform: translateX(300%); }
-  100% { transform: translateX(400%); }
+  0% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(100%);
+  }
+  50% {
+    transform: translateX(200%);
+  }
+  75% {
+    transform: translateX(300%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
 }
 </style>

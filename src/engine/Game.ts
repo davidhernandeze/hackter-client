@@ -38,12 +38,8 @@ export class Game {
   private isCurrentPlayerDeleted: boolean = false
 
   constructor(canvas: HTMLCanvasElement) {
-    // Initialize PIXI Application
     this.app = new Application()
-    this.initializeApp(canvas).then(() => {
-      // Start the game loop after initialization
-      this.startGameLoop()
-    })
+    this.initializeApp(canvas)
   }
 
   /**
@@ -160,11 +156,11 @@ export class Game {
 
       console.log('joined successfully', this.room)
       this.sessionId = this.room.sessionId
+      console.log('sessionId', this.sessionId)
+      this.startGameLoop()
 
       // Set up state change handler
       this.room.onStateChange((state) => {
-        console.log(state.mapVertices)
-
         // Draw map polygon if mapVertices exist
         if (state.mapVertices && state.mapVertices.length >= 6) {
           // At least 3 vertices (6 coordinates)
