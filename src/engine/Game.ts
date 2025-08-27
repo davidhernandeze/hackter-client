@@ -16,6 +16,9 @@ export class Game {
   // Grid background
   private gridGraphics: Graphics | null = null
 
+  // Map polygon
+  private mapPolygon: Graphics | null = null
+
   // Map of players by ID
   private players: Map<string, Player> = new Map()
 
@@ -157,6 +160,14 @@ export class Game {
 
       // Set up state change handler
       this.room.onStateChange((state) => {
+        console.log(state.mapVertices)
+
+        // Draw map polygon if mapVertices exist
+        if (state.mapVertices && state.mapVertices.length >= 6) {
+          // At least 3 vertices (6 coordinates)
+          this.drawMapPolygon(state.mapVertices)
+        }
+
         this.updatePlayers(state.players)
 
         // Call the callback if it exists
@@ -170,6 +181,45 @@ export class Game {
       console.error('Failed to connect to server:', error)
       return Promise.reject(error)
     }
+  }
+
+  /**
+   * Draw map polygon from vertices
+   */
+  private drawMapPolygon(mapVertices: number[]): void {
+    // Clear existing polygon if it exists
+    if (this.mapPolygon) {
+      if (this.mapPolygon.parent) {
+        this.mapPolygon.parent.removeChild(this.mapPolygon)
+      }
+      this.mapPolygon = null
+    }
+
+    // Create a new Graphics object for the polygon
+    this.mapPolygon = new Graphics()
+
+    // Start drawing the polygon
+    if (mapVertices.length >= 2) {
+      this.mapPolygon.moveTo(mapVertices[0], mapVertices[1])
+
+      // Add each vertex to the polygon
+      for (let i = 2; i < mapVertices.length; i += 2) {
+        if (i + 1 < mapVertices.length) {
+          this.mapPolygon.lineTo(mapVertices[i], mapVertices[i + 1])
+          this.mapPolygon.stroke({ color: 'red', pixelLine: true, width: 2 })
+        }
+      }
+
+      // Close the polygon
+      this.mapPolygon.lineTo(mapVertices[0], mapVertices[1])
+      this.gridGraphics.stroke({ color: 'red', pixelLine: true, width: 2 })
+    }
+
+    // End the fill
+    this.mapPolygon.endFill()
+
+    // Add the polygon to the world container (after grid but before players)
+    this.worldContainer.addChildAt(this.mapPolygon, 1)
   }
 
   /**
@@ -272,6 +322,14 @@ export class Game {
         this.gridGraphics.parent.removeChild(this.gridGraphics)
       }
       this.gridGraphics = null
+    }
+
+    // Clean up map polygon
+    if (this.mapPolygon) {
+      if (this.mapPolygon.parent) {
+        this.mapPolygon.parent.removeChild(this.mapPolygon)
+      }
+      this.mapPolygon = null
     }
 
     // Remove world container
