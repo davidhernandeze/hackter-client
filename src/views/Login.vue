@@ -3,6 +3,8 @@ import { ref } from 'vue'
 import UsernameUI from '@/components/UsernameUI.vue'
 import { promiseTimeout, useStorage } from '@vueuse/core'
 import { useRouter } from 'vue-router'
+import Desktop from '@/components/Desktop.vue'
+import Window from '@/components/Window.vue'
 
 const connectionStatus = ref('')
 const isConnecting = ref(false)
@@ -34,8 +36,8 @@ async function connectToRoom() {
 </script>
 
 <template>
-  <main>
-    <div>
+  <Desktop>
+    <Window>
       <UsernameUI
         v-model:playerName="playerName"
         :isConnecting="isConnecting"
@@ -48,17 +50,11 @@ async function connectToRoom() {
           </div>
         </template>
       </UsernameUI>
-    </div>
-  </main>
+    </Window>
+  </Desktop>
 </template>
 
 <style scoped>
-.status-message {
-  color: #00ff9c;
-  margin-bottom: 10px;
-  font-family: 'Courier New', monospace;
-}
-
 .loading-indicator {
   display: flex;
   justify-content: center;

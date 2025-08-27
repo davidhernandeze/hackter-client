@@ -1,11 +1,14 @@
 <script setup>
 import { ref, useTemplateRef, onMounted, onUnmounted } from 'vue'
 import { Game } from '@/engine/Game'
-import { useStorage } from '@vueuse/core'
-import router from '@/router/index.js'
+import { breakpointsTailwind, useBreakpoints, useStorage } from '@vueuse/core'
+import Desktop from '@/components/Desktop.vue'
+import { useRouter } from 'vue-router'
+import Window from '@/components/Window.vue'
 
 const gameUI = useTemplateRef('gameUI')
 const mainInput = useTemplateRef('mainInput')
+const router = useRouter()
 
 const gameStarted = ref(false)
 const gameOver = ref(false)
@@ -14,6 +17,23 @@ const isConnecting = ref(false)
 
 let game = null
 const playerName = useStorage('username', 'anon')
+
+const breakpoints = useBreakpoints(breakpointsTailwind)
+const smAndLarger = breakpoints.greaterOrEqual('sm')
+
+const gameUiStyle = ref({
+  width: smAndLarger.value ? '80dvw' : '90dvw',
+  height: smAndLarger.value ? '80dvh' : '60dvh',
+  top: smAndLarger.value ? '5%' : '25%',
+  right: smAndLarger.value ? '5%' : '2%',
+})
+
+const helpUiStyle = ref({
+  width: smAndLarger.value ? '20%' : '80%',
+  height: smAndLarger.value ? '20%' : '20%',
+  top: '1%',
+  left: '2%',
+})
 
 onMounted(async () => {
   game = new Game(gameUI.value)
@@ -63,11 +83,12 @@ function backToLogin() {
 
 <template>
   <main>
-    <div v-if="!gameOver">
-      <div ref="gameUI" />
-      <div
-        style="
-          position: fixed;
+    <Desktop v-if="!gameOver">
+      <Window :style="gameUiStyle" >
+        <div :style="{height: gameUiStyle.height}" ref="gameUI" />
+        <div
+          style="
+          position: absolute;
           margin: auto;
           bottom: 20px;
           display: flex;
@@ -75,12 +96,12 @@ function backToLogin() {
           justify-content: center;
           align-items: center;
         "
-      >
-        <input
-          v-model="command"
-          ref="mainInput"
-          type="text"
-          style="
+        >
+          <input
+            v-model="command"
+            ref="mainInput"
+            type="text"
+            style="
             width: 80%;
             background-color: #1f1f3e;
             padding: 0.5rem;
@@ -89,47 +110,40 @@ function backToLogin() {
             font-size: 2rem;
             border-radius: 1rem;
           "
-          @keyup.enter="handleCommand"
-        />
-      </div>
-      <div style="position: fixed; top: 0; right: 0; background-color: #1f1f3e; padding: 0.8rem; color: white">
-        <h4>Available commands:</h4>
-        <ul>
-          <li>up</li>
-          <li>down</li>
-          <li>left</li>
-          <li>right</li>
-          <li>print {text}</li>
-        </ul>
-      </div>
-    </div>
-    <div v-show="gameOver" class="game-over-container">
-      <div class="terminal-window">
-        <div class="terminal-header">
-          <div class="terminal-title">SYSTEM ALERT</div>
-          <div class="terminal-buttons">
-            <span class="terminal-button"></span>
-            <span class="terminal-button"></span>
-            <span class="terminal-button"></span>
-          </div>
+            @keyup.enter="handleCommand"
+          />
         </div>
-        <div class="terminal-body">
-          <div class="terminal-text">
-            <p class="blink">CONNECTION TERMINATED</p>
-            <p>> User account has been deleted from the system.</p>
-            <p>> Access privileges revoked.</p>
-            <p>> Session terminated by administrator.</p>
-            <button
-              @click="backToLogin"
-              class="terminal-button-connect"
-            >
-              <span class="button-text">BACK TO LOGIN</span>
-              <span class="button-glitch"></span>
-            </button>
-          </div>
+      </Window>
+      <Window :style="helpUiStyle">
+        <div style="padding: 1rem;">
+          <span style="padding: 0">Available commands:</span>
+          <ul>
+            <li>up</li>
+            <li>down</li>
+            <li>left</li>
+            <li>right</li>
+            <li>print {text}</li>
+          </ul>
         </div>
-      </div>
-    </div>
+      </Window>
+    </Desktop>
+    <Desktop v-show="gameOver">
+      <Window title="SYSTEM ALERT" theme="red">
+        <div class="terminal-text">
+          <p class="blink">CONNECTION TERMINATED</p>
+          <p>> User account has been deleted from the system.</p>
+          <p>> Access privileges revoked.</p>
+          <p>> Session terminated by administrator.</p>
+          <button
+            @click="backToLogin"
+            class="terminal-button-connect"
+          >
+            <span class="button-text">BACK TO LOGIN</span>
+            <span class="button-glitch"></span>
+          </button>
+        </div>
+      </Window>
+    </Desktop>
   </main>
 </template>
 
@@ -166,79 +180,9 @@ function backToLogin() {
 }
 
 /* Game Over Screen Styles */
-.game-over-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  width: 100vw;
-  background-color: #0a0a1a;
-  background-image:
-    radial-gradient(circle at 50% 50%, rgba(255, 0, 0, 0.1) 0%, transparent 80%),
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.2) 100%);
-  font-family: 'Courier New', monospace;
-}
-
-.terminal-window {
-  width: 80%;
-  max-width: 800px;
-  background-color: #0c0c14;
-  border-radius: 8px;
-  box-shadow: 0 0 20px rgba(255, 0, 0, 0.2), 0 0 30px rgba(0, 0, 0, 0.4);
-  overflow: hidden;
-  border: 1px solid #ff3030;
-  animation: borderPulse 4s infinite;
-}
-
-.terminal-header {
-  background-color: #1a1a2e;
-  padding: 10px 15px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid #ff3030;
-}
-
-.terminal-title {
-  color: #ff3030;
-  font-weight: bold;
-  letter-spacing: 1px;
-}
-
-.terminal-buttons {
-  display: flex;
-  gap: 8px;
-}
-
-.terminal-button {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background-color: #444;
-  display: inline-block;
-}
-
-.terminal-button:nth-child(1) {
-  background-color: #ff5f56;
-}
-
-.terminal-button:nth-child(2) {
-  background-color: #ffbd2e;
-}
-
-.terminal-button:nth-child(3) {
-  background-color: #27c93f;
-}
-
-.terminal-body {
-  padding: 20px;
-  color: #ff9c9c;
-  background-color: rgba(10, 10, 26, 0.95);
-  height: 300px;
-  overflow-y: auto;
-}
 
 .terminal-text {
+  padding: 1rem;
   line-height: 1.6;
 }
 

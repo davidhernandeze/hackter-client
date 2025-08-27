@@ -37,17 +37,14 @@ export class Game {
   // Flag to track if current player is deleted
   private isCurrentPlayerDeleted: boolean = false
 
-  constructor(canvas: HTMLCanvasElement) {
+  constructor(divContainer: HTMLDivElement) {
     this.app = new Application()
-    this.initializeApp(canvas)
+    this.initializeApp(divContainer)
   }
 
-  /**
-   * Initialize the PIXI Application
-   */
-  private async initializeApp(canvas: HTMLCanvasElement): Promise<void> {
-    await this.app.init({ background: '#1b2e49', resizeTo: window })
-    canvas.appendChild(this.app.canvas)
+  private async initializeApp(divContainer: HTMLDivElement): Promise<void> {
+    await this.app.init({ background: '#1b2e49', resizeTo: divContainer })
+    divContainer.appendChild(this.app.canvas)
 
     // Create world container for camera movement
     this.worldContainer = new Container()

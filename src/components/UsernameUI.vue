@@ -34,135 +34,48 @@ function connectToRoom() {
 </script>
 
 <template>
-  <div class="login-container">
-    <div class="terminal-window">
-      <div class="terminal-header">
-        <div class="terminal-title">HACKTER TERMINAL v1.0</div>
-        <div class="terminal-buttons">
-          <span class="terminal-button"></span>
-          <span class="terminal-button"></span>
-          <span class="terminal-button"></span>
-        </div>
-      </div>
-      <div class="terminal-body">
-        <div class="terminal-text">
-          <div class="ascii-art">
-            <pre>
+  <div class="terminal-text" style="padding: 20px">
+    <div class="ascii-art">
+        <pre>
  _    _          _____ _  _______ ______ _____
 | |  | |   /\   / ____| |/ /_   _|  ____|  __ \
 | |__| |  /  \ | |    | ' /  | | | |__  | |__) |
 |  __  | / /\ \| |    |  &lt;   | | |  __| |  _  /
 | |  | |/ ____ \ |____| . \  | | | |____| | \ \
 |_|  |_/_/    \_\_____|_|\_\ |_| |______|_|  \_\
-            </pre>
-          </div>
-          <p class="blink">SYSTEM INITIALIZED</p>
-          <p>> Establishing secure connection...</p>
-          <p>> Connection established.</p>
-          <p>> Enter your hacker alias to continue:</p>
-          <div class="input-line">
-            <span class="prompt">$</span>
-            <input
-              ref="playerNameInput"
-              v-model="playerName"
-              class="terminal-input"
-              @focus="startTypingEffect"
-              @keyup.enter="!props.isConnecting && connectToRoom()"
-              :class="{ typing: typingEffect }"
-            />
-          </div>
-          <div class="connection-status" v-if="$slots.status">
-            <slot name="status"></slot>
-          </div>
-          <button
-            @click="connectToRoom"
-            class="terminal-button-connect"
-            :disabled="props.isConnecting"
-            :class="{ connecting: props.isConnecting }"
-          >
-            <span class="button-text">{{ props.isConnecting ? 'CONNECTING...' : 'CONNECT' }}</span>
-            <span class="button-glitch"></span>
-          </button>
-        </div>
-      </div>
+        </pre>
     </div>
+    <p class="blink">SYSTEM INITIALIZED</p>
+    <p>> Establishing secure connection...</p>
+    <p>> Connection established.</p>
+    <p>> Enter your hacker alias to continue:</p>
+    <div class="connection-status" v-if="$slots.status">
+      <slot name="status"></slot>
+    </div>
+    <div class="input-line">
+      <span class="prompt">$</span>
+      <input
+        ref="playerNameInput"
+        v-model="playerName"
+        class="terminal-input"
+        @focus="startTypingEffect"
+        @keyup.enter="!props.isConnecting && connectToRoom()"
+        :class="{ typing: typingEffect }"
+      />
+    </div>
+    <button
+      @click="connectToRoom"
+      class="terminal-button-connect"
+      :disabled="props.isConnecting"
+      :class="{ connecting: props.isConnecting }"
+    >
+      <span class="button-text">{{ props.isConnecting ? 'CONNECTING...' : 'CONNECT' }}</span>
+      <span class="button-glitch"></span>
+    </button>
   </div>
 </template>
 
 <style scoped>
-.login-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  width: 100vw;
-  background-color: #0a0a1a;
-  background-image:
-    radial-gradient(circle at 50% 50%, rgba(33, 150, 243, 0.05) 0%, transparent 80%),
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.2) 100%);
-  font-family: 'Courier New', monospace;
-}
-
-.terminal-window {
-  width: 80%;
-  max-width: 800px;
-  background-color: #0c0c14;
-  border-radius: 8px;
-  box-shadow:
-    0 0 20px rgba(0, 255, 255, 0.2),
-    0 0 30px rgba(0, 0, 0, 0.4);
-  overflow: hidden;
-  border: 1px solid #30cfd0;
-  animation: borderPulse 4s infinite;
-}
-
-.terminal-header {
-  background-color: #1a1a2e;
-  padding: 10px 15px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid #30cfd0;
-}
-
-.terminal-title {
-  color: #30cfd0;
-  font-weight: bold;
-  letter-spacing: 1px;
-}
-
-.terminal-buttons {
-  display: flex;
-  gap: 8px;
-}
-
-.terminal-button {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background-color: #444;
-  display: inline-block;
-}
-
-.terminal-button:nth-child(1) {
-  background-color: #ff5f56;
-}
-
-.terminal-button:nth-child(2) {
-  background-color: #ffbd2e;
-}
-
-.terminal-button:nth-child(3) {
-  background-color: #27c93f;
-}
-
-.terminal-body {
-  padding: 20px;
-  color: #00ff9c;
-  background-color: rgba(10, 10, 26, 0.95);
-  height: 500px;
-  overflow-y: auto;
-}
 
 .terminal-text {
   line-height: 1.6;
