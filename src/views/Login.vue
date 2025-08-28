@@ -38,9 +38,10 @@ const breakpoints = useBreakpoints(breakpointsTailwind)
 const smAndLarger = breakpoints.greaterOrEqual('sm')
 const loginUiStyle = computed(() => ({
   width: smAndLarger.value ? '80dvw' : '90dvw',
+  margin: smAndLarger.value ? 'auto' : '90dvw',
   height: smAndLarger.value ? '80dvh' : '90dvh',
   top: smAndLarger.value ? '5%' : '5%',
-  right: smAndLarger.value ? '5%' : '2%',
+  right: smAndLarger.value ? '' : '2%',
 }))
 
 </script>
