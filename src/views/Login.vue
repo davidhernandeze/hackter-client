@@ -1,7 +1,7 @@
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import UsernameUI from '@/components/UsernameUI.vue'
-import { promiseTimeout, useStorage } from '@vueuse/core'
+import { breakpointsTailwind, promiseTimeout, useBreakpoints, useStorage } from '@vueuse/core'
 import { useRouter } from 'vue-router'
 import Desktop from '@/components/Desktop.vue'
 import Window from '@/components/Window.vue'
@@ -34,11 +34,20 @@ async function connectToRoom() {
   await router.push({ name: 'play' })
 }
 
+const breakpoints = useBreakpoints(breakpointsTailwind)
+const smAndLarger = breakpoints.greaterOrEqual('sm')
+const loginUiStyle = computed(() => ({
+  width: smAndLarger.value ? '80dvw' : '90dvw',
+  height: smAndLarger.value ? '80dvh' : '90dvh',
+  top: smAndLarger.value ? '5%' : '5%',
+  right: smAndLarger.value ? '5%' : '2%',
+}))
+
 </script>
 
 <template>
   <Desktop>
-    <Window>
+    <Window :style="loginUiStyle">
       <UsernameUI
         v-model:playerName="playerName"
         :isConnecting="isConnecting"

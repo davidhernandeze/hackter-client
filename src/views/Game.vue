@@ -1,5 +1,5 @@
 <script setup>
-import { ref, useTemplateRef, onMounted, onUnmounted } from 'vue'
+import { ref, useTemplateRef, onMounted, onUnmounted, computed } from 'vue'
 import { Game } from '@/engine/Game'
 import { breakpointsTailwind, useBreakpoints, useStorage } from '@vueuse/core'
 import Desktop from '@/components/Desktop.vue'
@@ -21,19 +21,19 @@ const playerName = useStorage('username', 'anon')
 const breakpoints = useBreakpoints(breakpointsTailwind)
 const smAndLarger = breakpoints.greaterOrEqual('sm')
 
-const gameUiStyle = ref({
+const gameUiStyle = computed(() => ({
   width: smAndLarger.value ? '80dvw' : '90dvw',
   height: smAndLarger.value ? '80dvh' : '60dvh',
   top: smAndLarger.value ? '5%' : '25%',
   right: smAndLarger.value ? '5%' : '2%',
-})
+}))
 
-const helpUiStyle = ref({
+const helpUiStyle = computed(() => ({
   width: smAndLarger.value ? '20%' : '80%',
   height: smAndLarger.value ? '20%' : '20%',
   top: '1%',
   left: '2%',
-})
+}))
 
 onMounted(async () => {
   game = new Game(gameUI.value)
