@@ -16,16 +16,17 @@ async function connectToRoom() {
 
   isConnecting.value = true
 
+  const messageDuration = import.meta.env.VITE_ENVIRONMENT === 'development' ? 2 : 1000
   connectionStatus.value = 'Initializing secure connection...'
-  await promiseTimeout(50)
+  await promiseTimeout(messageDuration)
   connectionStatus.value = 'Authenticating user credentials...'
-  await promiseTimeout(50)
+  await promiseTimeout(messageDuration)
   connectionStatus.value = 'Bypassing security protocols...'
-  await promiseTimeout(50)
+  await promiseTimeout(messageDuration)
   connectionStatus.value = 'Establishing encrypted channel...'
-  await promiseTimeout(50)
+  await promiseTimeout(messageDuration)
   connectionStatus.value = 'Connection established. Entering system...'
-  await promiseTimeout(50)
+  await promiseTimeout(messageDuration)
 
   isConnecting.value = false
   connectionStatus.value = ''

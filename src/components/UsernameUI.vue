@@ -49,9 +49,6 @@ function connectToRoom() {
     <p>> Establishing secure connection...</p>
     <p>> Connection established.</p>
     <p>> Enter your hacker alias to continue:</p>
-    <div class="connection-status" v-if="$slots.status">
-      <slot name="status"></slot>
-    </div>
     <div class="input-line">
       <span class="prompt">$</span>
       <input
@@ -72,6 +69,9 @@ function connectToRoom() {
       <span class="button-text">{{ props.isConnecting ? 'CONNECTING...' : 'CONNECT' }}</span>
       <span class="button-glitch"></span>
     </button>
+    <div class="connection-status" v-if="$slots.status">
+      <slot name="status"></slot>
+    </div>
   </div>
 </template>
 
