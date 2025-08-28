@@ -211,9 +211,6 @@ export class Game {
       this.gridGraphics.stroke({ color: 'green', width: 4 })
     }
 
-    // End the fill
-    this.mapPolygon.endFill()
-
     // Add the polygon to the world container (after grid but before players)
     this.worldContainer.addChildAt(this.mapPolygon, 1)
   }
