@@ -50,7 +50,7 @@ onUnmounted(() => {
 
 async function connectToRoom() {
   try {
-    await game.connectToServer('ws://localhost:2567', playerName.value)
+    await game.connectToServer(import.meta.env.VITE_SERVER_URL, playerName.value)
 
     game.onStateChange(() => {
       if (game.isPlayerDeleted()) {
