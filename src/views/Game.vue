@@ -95,6 +95,7 @@ const gameUiStyle = computed(() => ({
 
 const helpUiStyle = computed(() => ({
   width: smAndLarger.value ? '20dvw' : '55dvw',
+  minWidth: '300px',
   height: smAndLarger.value ? '25dvh' : '18dvh',
   fontSize: smAndLarger.value ? '1rem' : '0.7rem',
   top: '0',

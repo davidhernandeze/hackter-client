@@ -40,9 +40,9 @@ export class Game {
       console.log('sessionId', this.sessionId)
 
       await this.initializeApp(this.divContainer)
-      this.startGameLoop()
 
       this.room.onStateChange((state) => {
+        if (!this.animationFrameId) this.startGameLoop()
         this.drawMapPolygon(state.mapVertices)
 
         this.updatePlayers(state.players)
@@ -133,7 +133,6 @@ export class Game {
    */
   private updateCamera(): void {
     if (!this.sessionId || !this.players.has(this.sessionId)) return
-    console.log(this.cameraZoom)
     const currentPlayer = this.players.get(this.sessionId)!
 
     const screenCenterX = this.app.screen.width / 2
