@@ -40,6 +40,7 @@ export class Game {
       console.log('sessionId', this.sessionId)
 
       await this.initializeApp(this.divContainer)
+      this.sendCommand('start')
 
       this.room.onStateChange((state) => {
         if (!this.animationFrameId) {
