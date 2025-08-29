@@ -106,7 +106,7 @@ export class Game {
     const updateFrame = () => {
       // Update all players
       for (const player of this.players.values()) {
-        player.update(0, 0.1) // Using fixed lerp factor for now
+        player.update(0, 0.15) // Using fixed lerp factor for now
       }
 
       // Camera follow logic - center on current player
