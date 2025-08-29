@@ -41,6 +41,7 @@ export class Game {
 
       await this.initializeApp(this.divContainer)
       this.startGameLoop()
+      this.updateCamera()
 
       this.room.onStateChange((state) => {
         this.drawMapPolygon(state.mapVertices)
