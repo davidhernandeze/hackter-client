@@ -49,7 +49,7 @@ async function connectToRoom() {
   }
 }
 
-const zoomLevels = [3, 5, 8]
+const zoomLevels = [4, 5, 6]
 let currentZoomIndex = 1
 
 function handleCommand() {

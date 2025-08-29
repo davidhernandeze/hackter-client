@@ -8,6 +8,7 @@ import Colyseus from 'colyseus.js'
  */
 export class Game {
   private app: Application
+  private readonly divContainer: HTMLDivElement
   private worldContainer: Container
   private gridGraphics: Graphics | null = null
   private mapPolygon: Graphics | null = null
@@ -17,39 +18,66 @@ export class Game {
   private animationFrameId: number | null = null
   private onStateChangeCallback: (() => void) | null = null
   private isCurrentPlayerDeleted: boolean = false
-  private readonly GRID_SIZE = 5
+  private readonly GRID_SIZE = 10
 
   private cameraZoom: number = 5
 
   constructor(divContainer: HTMLDivElement) {
     this.app = new Application()
-    this.initializeApp(divContainer)
+    this.divContainer = divContainer
+  }
+
+  async connectToServer(serverUrl: string, playerName: string): Promise<void> {
+    try {
+      const client = new Colyseus.Client(serverUrl)
+      this.room = await client.joinOrCreate('arena', {
+        name: playerName,
+        color: Math.floor(Math.random() * 0xffffff),
+      })
+
+      console.log('joined successfully', this.room)
+      this.sessionId = this.room.sessionId
+      console.log('sessionId', this.sessionId)
+
+      await this.initializeApp(this.divContainer)
+      this.startGameLoop()
+
+      this.room.onStateChange((state) => {
+        if (state.mapVertices && state.mapVertices.length >= 6) {
+          this.drawMapPolygon(state.mapVertices)
+        }
+
+        this.updatePlayers(state.players)
+
+        if (this.onStateChangeCallback) {
+          this.onStateChangeCallback()
+        }
+      })
+
+      return Promise.resolve()
+    } catch (error) {
+      console.error('Failed to connect to server:', error)
+      return Promise.reject(error)
+    }
   }
 
   private async initializeApp(divContainer: HTMLDivElement): Promise<void> {
     await this.app.init({ background: '#1b2e49', resizeTo: divContainer })
     divContainer.appendChild(this.app.canvas)
 
-    // Create world container for camera movement
     this.worldContainer = new Container()
     this.app.stage.addChild(this.worldContainer)
 
-    // Create grid background
     this.createGrid()
   }
 
-  /**
-   * Create a grid background
-   */
   private createGrid(): void {
-    // Create a new Graphics object for the grid
     this.gridGraphics = new Graphics()
 
-    // Set grid properties
-    const gridSize = this.GRID_SIZE // Size of each grid cell
-    const gridWidth = 100000 // Total width of the grid
-    const gridHeight = 100000 // Total height of the grid
-    const gridColor = 0x2a3f5f // Slightly lighter than the background
+    const gridSize = this.GRID_SIZE
+    const gridWidth = 100000
+    const gridHeight = 100000
+    const gridColor = 0x2a3f5f
 
     // Draw vertical lines
     for (let x = -gridWidth / 2; x <= gridWidth / 2; x += gridSize) {
@@ -125,44 +153,6 @@ export class Game {
     this.worldContainer.scale.set(this.cameraZoom)
   }
 
-  /**
-   * Connect to the game server
-   */
-  async connectToServer(serverUrl: string, playerName: string): Promise<void> {
-    try {
-      const client = new Colyseus.Client(serverUrl)
-      this.room = await client.joinOrCreate('arena', {
-        name: playerName,
-        color: Math.floor(Math.random() * 0xffffff),
-      })
-
-      console.log('joined successfully', this.room)
-      this.sessionId = this.room.sessionId
-      console.log('sessionId', this.sessionId)
-      this.startGameLoop()
-
-      // Set up state change handler
-      this.room.onStateChange((state) => {
-        // Draw map polygon if mapVertices exist
-        if (state.mapVertices && state.mapVertices.length >= 6) {
-          // At least 3 vertices (6 coordinates)
-          this.drawMapPolygon(state.mapVertices)
-        }
-
-        this.updatePlayers(state.players)
-
-        // Call the callback if it exists
-        if (this.onStateChangeCallback) {
-          this.onStateChangeCallback()
-        }
-      })
-
-      return Promise.resolve()
-    } catch (error) {
-      console.error('Failed to connect to server:', error)
-      return Promise.reject(error)
-    }
-  }
 
   /**
    * Draw map polygon from vertices
