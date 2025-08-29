@@ -41,7 +41,6 @@ export class Game {
 
       await this.initializeApp(this.divContainer)
       this.startGameLoop()
-      this.updateCamera()
 
       this.room.onStateChange((state) => {
         this.drawMapPolygon(state.mapVertices)
@@ -134,6 +133,7 @@ export class Game {
    */
   private updateCamera(): void {
     if (!this.sessionId || !this.players.has(this.sessionId)) return
+    console.log(this.cameraZoom)
     const currentPlayer = this.players.get(this.sessionId)!
 
     const screenCenterX = this.app.screen.width / 2
