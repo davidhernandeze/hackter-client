@@ -7,6 +7,10 @@ const props = defineProps({
     type: String,
     default: 'blue'
   },
+  bodyOverflow: {
+    type: String,
+    default: 'auto'
+  },
 })
 
 const themeColor = ref(props.theme === 'red' ? '#ff3030' : '#30cfd0')
@@ -42,9 +46,11 @@ const themeGlowColor = ref(
   border-radius: 8px;
   box-shadow: 0 0 20px v-bind(themeGlowColor),
   0 0 30px rgba(0, 0, 0, 0.4);
-  overflow: hidden;
   border: 1px solid v-bind(themeColor);
   animation: borderPulse 4s infinite;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .terminal-window.theme-red {
@@ -55,6 +61,7 @@ const themeGlowColor = ref(
 
 .terminal-header {
   background-color: #1a1a2e;
+  height: 1rem;
   padding: 10px 15px;
   display: flex;
   justify-content: space-between;
@@ -104,7 +111,7 @@ const themeGlowColor = ref(
 .terminal-body {
   color: #00ff9c;
   background-color: rgba(10, 10, 26, 0.95);
-  overflow: hidden;
+  overflow: v-bind(bodyOverflow);
 }
 
 @keyframes borderPulse {

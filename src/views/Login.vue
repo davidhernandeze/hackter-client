@@ -37,10 +37,9 @@ async function connectToRoom() {
 const breakpoints = useBreakpoints(breakpointsTailwind)
 const smAndLarger = breakpoints.greaterOrEqual('sm')
 const loginUiStyle = computed(() => ({
-  width: smAndLarger.value ? '80dvw' : '90dvw',
-  margin: smAndLarger.value ? 'auto' : '90dvw',
+  width: smAndLarger.value ? '80dvw' : '95dvw',
   height: smAndLarger.value ? '80dvh' : '90dvh',
-  top: smAndLarger.value ? '5%' : '5%',
+  top: smAndLarger.value ? '1rem' : '1rem',
   right: smAndLarger.value ? '' : '2%',
 }))
 

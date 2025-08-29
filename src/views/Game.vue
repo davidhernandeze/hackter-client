@@ -18,23 +18,6 @@ const isConnecting = ref(false)
 let game = null
 const playerName = useStorage('username', 'anon')
 
-const breakpoints = useBreakpoints(breakpointsTailwind)
-const smAndLarger = breakpoints.greaterOrEqual('sm')
-
-const gameUiStyle = computed(() => ({
-  width: smAndLarger.value ? '80dvw' : '90dvw',
-  height: smAndLarger.value ? '80dvh' : '60dvh',
-  top: smAndLarger.value ? '5%' : '25%',
-  right: smAndLarger.value ? '5%' : '2%',
-}))
-
-const helpUiStyle = computed(() => ({
-  width: smAndLarger.value ? '20%' : '80%',
-  height: smAndLarger.value ? '25%' : '20%',
-  top: '1%',
-  left: '2%',
-}))
-
 onMounted(async () => {
   game = new Game(gameUI.value)
   mainInput.value.focus()
@@ -98,12 +81,30 @@ function backToLogin() {
   command.value = ''
   router.replace({ name: 'login' })
 }
+
+const breakpoints = useBreakpoints(breakpointsTailwind)
+const smAndLarger = breakpoints.greaterOrEqual('sm')
+
+const gameUiStyle = computed(() => ({
+  width: smAndLarger.value ? '80dvw' : '95dvw',
+  height: smAndLarger.value ? '80dvh' : '60dvh',
+  top: smAndLarger.value ? '2dvh' : '2dvh',
+  right: smAndLarger.value ? '5%' : '2%',
+}))
+
+const helpUiStyle = computed(() => ({
+  width: smAndLarger.value ? '20dvw' : '55dvw',
+  height: smAndLarger.value ? '25dvh' : '18dvh',
+  fontSize: smAndLarger.value ? '1rem' : '0.7rem',
+  top: '0',
+  left: smAndLarger.value ? '2%' : '0',
+}))
 </script>
 
 <template>
   <main>
     <Desktop v-if="!gameOver">
-      <Window :style="gameUiStyle">
+      <Window title="hackter.exe" :style="gameUiStyle" :body-overflow="'hidden'">
         <div :style="{ height: gameUiStyle.height }" ref="gameUI" />
         <div
           style="
@@ -133,10 +134,9 @@ function backToLogin() {
           />
         </div>
       </Window>
-      <Window :style="helpUiStyle">
-        <div style="padding: 1rem">
-          <span>Available commands:</span>
-          <ul>
+      <Window title="command_list.exe " :style="helpUiStyle">
+        <div style="padding: 0.5rem">
+          <ul style="margin: 0; padding-left: 1rem">
             <li>up</li>
             <li>down</li>
             <li>left</li>

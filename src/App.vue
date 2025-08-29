@@ -13,4 +13,23 @@ body, html {
   padding: 0;
   overflow: hidden;
 }
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #1f2937 transparent;
+}
+
+/* Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+  width: 5px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #2c394a;
+  border-radius: 5px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #1f2937;
+}
 </style>
