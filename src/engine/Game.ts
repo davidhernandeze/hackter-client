@@ -43,9 +43,7 @@ export class Game {
       this.startGameLoop()
 
       this.room.onStateChange((state) => {
-        if (state.mapVertices && state.mapVertices.length >= 6) {
-          this.drawMapPolygon(state.mapVertices)
-        }
+        this.drawMapPolygon(state.mapVertices)
 
         this.updatePlayers(state.players)
 
@@ -153,23 +151,14 @@ export class Game {
     this.worldContainer.scale.set(this.cameraZoom)
   }
 
-
   /**
    * Draw map polygon from vertices
    */
   private drawMapPolygon(mapVertices: number[]): void {
-    // Clear existing polygon if it exists
-    if (this.mapPolygon) {
-      if (this.mapPolygon.parent) {
-        this.mapPolygon.parent.removeChild(this.mapPolygon)
-      }
-      this.mapPolygon = null
-    }
+    if (this.mapPolygon) return
 
-    // Create a new Graphics object for the polygon
     this.mapPolygon = new Graphics()
 
-    // Start drawing the polygon
     if (mapVertices.length >= 2) {
       this.mapPolygon.moveTo(mapVertices[0], mapVertices[1])
 
@@ -177,13 +166,13 @@ export class Game {
       for (let i = 2; i < mapVertices.length; i += 2) {
         if (i + 1 < mapVertices.length) {
           this.mapPolygon.lineTo(mapVertices[i], mapVertices[i + 1])
-          this.mapPolygon.stroke({ color: 'red', width: 2})
+          this.mapPolygon.stroke({ color: 'red', width: 1 })
         }
       }
 
       // Close the polygon
       this.mapPolygon.lineTo(mapVertices[0], mapVertices[1])
-      this.gridGraphics.stroke({ color: 'red', width: 2 })
+      this.gridGraphics.stroke({ color: 'red', width: 1 })
     }
 
     this.mapPolygon.endFill()

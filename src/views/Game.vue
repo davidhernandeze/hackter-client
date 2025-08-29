@@ -34,6 +34,7 @@ onUnmounted(() => {
 async function connectToRoom() {
   try {
     await game.connectToServer(import.meta.env.VITE_SERVER_URL, playerName.value)
+    game.setCameraZoom(zoomLevels[currentZoomIndex])
 
     game.onStateChange(() => {
       if (game.isPlayerDeleted()) {
