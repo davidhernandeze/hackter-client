@@ -42,7 +42,10 @@ export class Game {
       await this.initializeApp(this.divContainer)
 
       this.room.onStateChange((state) => {
-        if (!this.animationFrameId) this.startGameLoop()
+        if (!this.animationFrameId) {
+          console.log('Game loop started', state.players)
+          this.startGameLoop()
+        }
         this.drawMapPolygon(state.mapVertices)
 
         this.updatePlayers(state.players)
