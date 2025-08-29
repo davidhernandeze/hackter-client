@@ -30,7 +30,7 @@ const gameUiStyle = computed(() => ({
 
 const helpUiStyle = computed(() => ({
   width: smAndLarger.value ? '20%' : '80%',
-  height: smAndLarger.value ? '20%' : '20%',
+  height: smAndLarger.value ? '25%' : '20%',
   top: '1%',
   left: '2%',
 }))
@@ -66,11 +66,30 @@ async function connectToRoom() {
   }
 }
 
+const zoomLevels = [3, 5, 8]
+let currentZoomIndex = 1
+
 function handleCommand() {
-  if (game) {
-    game.sendCommand(command.value)
+  if (!game) return
+  const cmd = command.value.toLowerCase().trim()
+
+  if (cmd === 'zoom in') {
+    if (currentZoomIndex < zoomLevels.length - 1) {
+      currentZoomIndex++
+    }
+    game.setCameraZoom(zoomLevels[currentZoomIndex])
     command.value = ''
+    return
+  } else if (cmd === 'zoom out') {
+    if (currentZoomIndex > 0) {
+      currentZoomIndex--
+    }
+    game.setCameraZoom(zoomLevels[currentZoomIndex])
+    command.value = ''
+    return
   }
+  game.sendCommand(command.value)
+  command.value = ''
 }
 
 function backToLogin() {
@@ -84,45 +103,47 @@ function backToLogin() {
 <template>
   <main>
     <Desktop v-if="!gameOver">
-      <Window :style="gameUiStyle" >
-        <div :style="{height: gameUiStyle.height}" ref="gameUI" />
+      <Window :style="gameUiStyle">
+        <div :style="{ height: gameUiStyle.height }" ref="gameUI" />
         <div
           style="
-          position: absolute;
-          margin: auto;
-          bottom: 20px;
-          display: flex;
-          width: 100%;
-          justify-content: center;
-          align-items: center;
-        "
+            position: absolute;
+            margin: auto;
+            bottom: 20px;
+            display: flex;
+            width: 100%;
+            justify-content: center;
+            align-items: center;
+          "
         >
           <input
             v-model="command"
             ref="mainInput"
             type="text"
             style="
-            width: 80%;
-            background-color: #1f1f3e;
-            padding: 0.5rem;
-            color: white;
-            border: none;
-            font-size: 2rem;
-            border-radius: 1rem;
-          "
+              width: 80%;
+              background-color: #1f1f3e;
+              padding: 0.5rem;
+              color: white;
+              border: none;
+              font-size: 2rem;
+              border-radius: 1rem;
+            "
             @keyup.enter="handleCommand"
           />
         </div>
       </Window>
       <Window :style="helpUiStyle">
-        <div style="padding: 1rem;">
-          <span style="padding: 0">Available commands:</span>
+        <div style="padding: 1rem">
+          <span>Available commands:</span>
           <ul>
             <li>up</li>
             <li>down</li>
             <li>left</li>
             <li>right</li>
             <li>print {text}</li>
+            <li>zoom in</li>
+            <li>zoom out</li>
           </ul>
         </div>
       </Window>
@@ -134,10 +155,7 @@ function backToLogin() {
           <p>> User account has been deleted from the system.</p>
           <p>> Access privileges revoked.</p>
           <p>> Session terminated by administrator.</p>
-          <button
-            @click="backToLogin"
-            class="terminal-button-connect"
-          >
+          <button @click="backToLogin" class="terminal-button-connect">
             <span class="button-text">BACK TO LOGIN</span>
             <span class="button-glitch"></span>
           </button>
@@ -250,18 +268,26 @@ function backToLogin() {
 
 @keyframes borderPulse {
   0% {
-    box-shadow: 0 0 10px rgba(255, 48, 48, 0.5), 0 0 20px rgba(0, 0, 0, 0.4);
+    box-shadow:
+      0 0 10px rgba(255, 48, 48, 0.5),
+      0 0 20px rgba(0, 0, 0, 0.4);
   }
   50% {
-    box-shadow: 0 0 15px rgba(255, 48, 48, 0.8), 0 0 30px rgba(0, 0, 0, 0.4);
+    box-shadow:
+      0 0 15px rgba(255, 48, 48, 0.8),
+      0 0 30px rgba(0, 0, 0, 0.4);
   }
   100% {
-    box-shadow: 0 0 10px rgba(255, 48, 48, 0.5), 0 0 20px rgba(0, 0, 0, 0.4);
+    box-shadow:
+      0 0 10px rgba(255, 48, 48, 0.5),
+      0 0 20px rgba(0, 0, 0, 0.4);
   }
 }
 
 @keyframes loadingDots {
-  0%, 80%, 100% {
+  0%,
+  80%,
+  100% {
     transform: scale(0);
     opacity: 0.3;
   }
@@ -272,15 +298,30 @@ function backToLogin() {
 }
 
 @keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
 }
 
 @keyframes glitch {
-  0% { transform: translateX(0); }
-  25% { transform: translateX(100%); }
-  50% { transform: translateX(200%); }
-  75% { transform: translateX(300%); }
-  100% { transform: translateX(400%); }
+  0% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(100%);
+  }
+  50% {
+    transform: translateX(200%);
+  }
+  75% {
+    transform: translateX(300%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
 }
 </style>

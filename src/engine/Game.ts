@@ -7,35 +7,19 @@ import Colyseus from 'colyseus.js'
  * Manages players, game state, and rendering
  */
 export class Game {
-  // PIXI Application
   private app: Application
-
-  // World container for camera movement
   private worldContainer: Container
-
-  // Grid background
   private gridGraphics: Graphics | null = null
-
-  // Map polygon
   private mapPolygon: Graphics | null = null
-
-  // Map of players by ID
   private players: Map<string, Player> = new Map()
-
-  // Colyseus room
   private room: Colyseus.Room | null = null
-
-  // Session ID of the current player
   private sessionId: string | null = null
-
-  // Animation frame ID for the game loop
   private animationFrameId: number | null = null
-
-  // Callback for game state changes
   private onStateChangeCallback: (() => void) | null = null
-
-  // Flag to track if current player is deleted
   private isCurrentPlayerDeleted: boolean = false
+  private readonly GRID_SIZE = 5
+
+  private cameraZoom: number = 5
 
   constructor(divContainer: HTMLDivElement) {
     this.app = new Application()
@@ -62,7 +46,7 @@ export class Game {
     this.gridGraphics = new Graphics()
 
     // Set grid properties
-    const gridSize = 50 // Size of each grid cell
+    const gridSize = this.GRID_SIZE // Size of each grid cell
     const gridWidth = 100000 // Total width of the grid
     const gridHeight = 100000 // Total height of the grid
     const gridColor = 0x2a3f5f // Slightly lighter than the background
@@ -81,7 +65,6 @@ export class Game {
       this.gridGraphics.stroke({ color: gridColor, pixelLine: true })
     }
 
-    // Add the grid to the world container (before any other elements)
     this.worldContainer.addChild(this.gridGraphics)
   }
 
@@ -123,21 +106,23 @@ export class Game {
    * Update camera position to follow current player
    */
   private updateCamera(): void {
-    if (this.sessionId && this.players.has(this.sessionId)) {
-      const currentPlayer = this.players.get(this.sessionId)!
+    if (!this.sessionId || !this.players.has(this.sessionId)) return
+    const currentPlayer = this.players.get(this.sessionId)!
 
-      // Calculate center of the screen
-      const screenCenterX = this.app.screen.width / 2
-      const screenCenterY = this.app.screen.height / 2
+    const screenCenterX = this.app.screen.width / 2
+    const screenCenterY = this.app.screen.height / 2
 
-      // Calculate target position for the world container
-      const targetX = screenCenterX - currentPlayer.x
-      const targetY = screenCenterY - currentPlayer.y
+    // Calculate target position to center the player
+    // We need to position the world container so that the player is at the center of the screen
+    const targetX = screenCenterX - currentPlayer.x * this.cameraZoom
+    const targetY = screenCenterY - currentPlayer.y * this.cameraZoom
 
-      // Smooth camera movement using lerp
-      this.worldContainer.x = this.worldContainer.x + (targetX - this.worldContainer.x) * 0.05
-      this.worldContainer.y = this.worldContainer.y + (targetY - this.worldContainer.y) * 0.05
-    }
+    // Apply smooth movement using lerp (linear interpolation)
+    this.worldContainer.x = this.worldContainer.x + (targetX - this.worldContainer.x) * 0.1
+    this.worldContainer.y = this.worldContainer.y + (targetY - this.worldContainer.y) * 0.1
+
+    // Apply zoom level
+    this.worldContainer.scale.set(this.cameraZoom)
   }
 
   /**
@@ -202,13 +187,13 @@ export class Game {
       for (let i = 2; i < mapVertices.length; i += 2) {
         if (i + 1 < mapVertices.length) {
           this.mapPolygon.lineTo(mapVertices[i], mapVertices[i + 1])
-          this.mapPolygon.stroke({ color: 'green', width: 4})
+          this.mapPolygon.stroke({ color: 'red', width: 2})
         }
       }
 
       // Close the polygon
       this.mapPolygon.lineTo(mapVertices[0], mapVertices[1])
-      this.gridGraphics.stroke({ color: 'green', width: 4 })
+      this.gridGraphics.stroke({ color: 'red', width: 2 })
     }
 
     this.mapPolygon.endFill()
@@ -306,6 +291,22 @@ export class Game {
    */
   isPlayerDeleted(): boolean {
     return this.isCurrentPlayerDeleted
+  }
+
+  /**
+   * Set camera zoom level
+   * @param zoom - Zoom level (1.0 is normal, >1 zooms in, <1 zooms out)
+   */
+  setCameraZoom(zoom: number): void {
+    // Ensure zoom is within reasonable limits
+    this.cameraZoom = Math.max(0.1, Math.min(zoom, 10.0))
+  }
+
+  /**
+   * Get current camera zoom level
+   */
+  getCameraZoom(): number {
+    return this.cameraZoom
   }
 
   /**
