@@ -5,6 +5,7 @@ import { breakpointsTailwind, useBreakpoints, useStorage } from '@vueuse/core'
 import Desktop from '@/components/Desktop.vue'
 import { useRouter } from 'vue-router'
 import Window from '@/components/Window.vue'
+import Keyboard from '@/components/Keyboard.vue'
 
 const gameUI = useTemplateRef('gameUI')
 const mainInput = useTemplateRef('mainInput')
@@ -95,11 +96,20 @@ const gameUiStyle = computed(() => ({
 
 const helpUiStyle = computed(() => ({
   width: smAndLarger.value ? '20dvw' : '55dvw',
-  minWidth: '300px',
+  minWidth: '200px',
   height: smAndLarger.value ? '25dvh' : '18dvh',
   fontSize: smAndLarger.value ? '1rem' : '0.7rem',
   top: '0',
   left: smAndLarger.value ? '2%' : '0',
+}))
+
+const keyboardStyle = computed(() => ({
+  display: smAndLarger.value ? 'none' : 'block',
+  width: '95dvw',
+  height: '35dvh',
+  fontSize: smAndLarger.value ? '1rem' : '0.7rem',
+  bottom: '0',
+  margin: 'auto'
 }))
 </script>
 
@@ -121,6 +131,7 @@ const helpUiStyle = computed(() => ({
         >
           <input
             v-model="command"
+            :disabled="!smAndLarger"
             ref="mainInput"
             type="text"
             style="
@@ -148,6 +159,9 @@ const helpUiStyle = computed(() => ({
             <li>zoom out</li>
           </ul>
         </div>
+      </Window>
+      <Window title="keyboard.exe " :style="keyboardStyle">
+        <Keyboard v-model="command" @enter="handleCommand" />
       </Window>
     </Desktop>
     <Desktop v-show="gameOver">
