@@ -80,6 +80,9 @@ const themeGlowColor = ref(
   color: v-bind(themeColor);
   font-weight: bold;
   letter-spacing: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .terminal-window.theme-red .terminal-title {
