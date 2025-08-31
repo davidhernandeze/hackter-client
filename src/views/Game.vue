@@ -101,6 +101,8 @@ const helpUiStyle = computed(() => ({
   top: '0',
   left: smAndLarger.value ? '2%' : '0',
 }))
+
+const typingEffect = ref(false)
 </script>
 
 <template>
@@ -109,31 +111,36 @@ const helpUiStyle = computed(() => ({
       <Window title="hackter.exe" :style="gameUiStyle" :body-overflow="'hidden'">
         <div :style="{ height: gameUiStyle.height }" ref="gameUI" />
         <div
+          :style="{
+            position: smAndLarger ? 'absolute' : 'fixed',
+            bottom: smAndLarger ? '0' : '1rem',
+            right: smAndLarger ? '' : 0,
+            left: smAndLarger ? '' : 0,
+          }"
           style="
-            position: absolute;
-            margin: auto;
-            bottom: 20px;
+            font-size: 2rem;
+            bottom: 0;
             display: flex;
             width: 100%;
-            justify-content: center;
+            justify-content: start;
             align-items: center;
+            background-color: rgba(0, 0, 0, 0.4);
           "
         >
-          <input
-            v-model="command"
-            ref="mainInput"
-            type="url"
-            style="
-              width: 80%;
-              background-color: #1f1f3e;
-              padding: 0.5rem;
-              color: white;
-              border: none;
-              font-size: 2rem;
-              border-radius: 1rem;
-            "
-            @keyup.enter="handleCommand"
-          />
+          <div class="input-line" style="width: 100%; padding: 0 1rem">
+            <span class="prompt">$</span>
+            <input
+              v-model="command"
+              ref="mainInput"
+              class="terminal-input"
+              @focus="typingEffect = true"
+              @blur="(e) => e.target.focus()"
+              @keyup.enter="handleCommand"
+              type="url"
+              :class="{ typing: typingEffect }"
+              style="width: 100%"
+            />
+          </div>
         </div>
       </Window>
       <Window title="command_list.exe " :style="helpUiStyle">

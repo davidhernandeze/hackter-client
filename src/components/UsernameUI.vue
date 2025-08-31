@@ -53,6 +53,7 @@ function connectToRoom() {
       <span class="prompt">$</span>
       <input
         ref="playerNameInput"
+        type="url"
         v-model="playerName"
         class="terminal-input"
         @focus="startTypingEffect"
@@ -75,7 +76,7 @@ function connectToRoom() {
   </div>
 </template>
 
-<style scoped>
+<style>
 
 .terminal-text {
   line-height: 1.6;
