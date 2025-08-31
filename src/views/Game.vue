@@ -88,15 +88,15 @@ const smAndLarger = breakpoints.greaterOrEqual('sm')
 
 const gameUiStyle = computed(() => ({
   width: smAndLarger.value ? '80dvw' : '95dvw',
-  height: smAndLarger.value ? '80dvh' : '60dvh',
+  height: smAndLarger.value ? '80dvh' : '100dvh',
   top: smAndLarger.value ? '2dvh' : '2dvh',
   right: smAndLarger.value ? '5%' : '2%',
 }))
 
 const helpUiStyle = computed(() => ({
-  width: smAndLarger.value ? '20dvw' : '55dvw',
-  minWidth: '300px',
-  height: smAndLarger.value ? '25dvh' : '18dvh',
+  width: smAndLarger.value ? '20dvw' : '10dvw',
+  minWidth: '100px',
+  height: smAndLarger.value ? '25dvh' : 'auto',
   fontSize: smAndLarger.value ? '1rem' : '0.7rem',
   top: '0',
   left: smAndLarger.value ? '2%' : '0',
@@ -122,7 +122,7 @@ const helpUiStyle = computed(() => ({
           <input
             v-model="command"
             ref="mainInput"
-            type="text"
+            type="url"
             style="
               width: 80%;
               background-color: #1f1f3e;
