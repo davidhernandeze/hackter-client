@@ -1,5 +1,8 @@
 <script setup>
 import { ref } from 'vue'
+import { useFullscreen } from '@vueuse/core'
+
+const { toggle } = useFullscreen()
 
 const props = defineProps({
   title: String,
@@ -26,7 +29,7 @@ const themeGlowColor = ref(
       <div class="terminal-buttons">
         <span class="terminal-button"></span>
         <span class="terminal-button"></span>
-        <span class="terminal-button"></span>
+        <span class="terminal-button" @click="toggle"></span>
       </div>
     </div>
     <div class="terminal-body">
