@@ -103,7 +103,7 @@ export class Game {
 
     const updateFrame = () => {
       for (const player of this.players.values()) {
-        player.update(0, 0.15) // Using fixed lerp factor for now
+        player.update(0, 0.05) // Using fixed lerp factor for now
       }
 
       this.updateCamera()
