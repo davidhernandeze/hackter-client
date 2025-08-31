@@ -1,4 +1,4 @@
-import { Application, Container, Graphics } from 'pixi.js'
+import { Application, Container, Graphics, Text } from 'pixi.js'
 import { Player } from './Player'
 import Colyseus from 'colyseus.js'
 
@@ -81,13 +81,11 @@ export class Game {
     const gridHeight = 100000
     const gridColor = 0x2a3f5f
 
-    // Draw vertical lines
     for (let x = -gridWidth / 2; x <= gridWidth / 2; x += gridSize) {
       this.gridGraphics.moveTo(x, -gridHeight / 2)
       this.gridGraphics.lineTo(x, gridHeight / 2)
       this.gridGraphics.stroke({ color: gridColor, pixelLine: true })
     }
-    // Draw horizontal lines
 
     for (let y = -gridHeight / 2; y <= gridHeight / 2; y += gridSize) {
       this.gridGraphics.moveTo(-gridWidth / 2, y)
@@ -98,22 +96,16 @@ export class Game {
     this.worldContainer.addChild(this.gridGraphics)
   }
 
-  /**
-   * Start the game loop
-   */
   startGameLoop(): void {
-    // Cancel any existing animation frame
     if (this.animationFrameId !== null) {
       cancelAnimationFrame(this.animationFrameId)
     }
 
     const updateFrame = () => {
-      // Update all players
       for (const player of this.players.values()) {
         player.update(0, 0.15) // Using fixed lerp factor for now
       }
 
-      // Camera follow logic - center on current player
       this.updateCamera()
 
       this.animationFrameId = requestAnimationFrame(updateFrame)
@@ -170,7 +162,7 @@ export class Game {
       for (let i = 2; i < mapVertices.length; i += 2) {
         if (i + 1 < mapVertices.length) {
           this.mapPolygon.lineTo(mapVertices[i], mapVertices[i + 1])
-          this.mapPolygon.stroke({ color: 'red', width: 1 })
+          this.mapPolygon.stroke({ color: 'red', pixelLine: true })
         }
       }
 
@@ -183,6 +175,20 @@ export class Game {
 
     // Add the polygon to the world container (after grid but before players)
     this.worldContainer.addChildAt(this.mapPolygon, 1)
+
+    const adviceText = new Text({
+      text: 'Do not touch the walls!',
+      style: {
+        fontFamily: 'Arial',
+        fontSize: 6,
+        fill: 'rgba(255,255,255,0.07)',
+        wordWrap: true
+      },
+      resolution: 10
+    })
+    adviceText.x = 20
+    adviceText.y = 20
+    this.worldContainer.addChild(adviceText)
   }
 
   /**
