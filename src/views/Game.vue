@@ -107,19 +107,18 @@ const typingEffect = ref(false)
 
 <template>
   <main>
-    <Desktop v-if="!gameOver">
+    <Desktop v-if="!gameOver" style="max-height: 100vh; overflow: hidden">
       <Window title="hackter.exe" :style="gameUiStyle" :body-overflow="'hidden'">
         <div :style="{ height: gameUiStyle.height }" ref="gameUI" />
         <div
           :style="{
-            position: smAndLarger ? 'absolute' : 'fixed',
-            bottom: smAndLarger ? '0' : '1rem',
-            right: smAndLarger ? '' : 0,
-            left: smAndLarger ? '' : 0,
+            position: smAndLarger ? 'absolute' : 'fixed'
           }"
           style="
             font-size: 2rem;
             bottom: 0;
+            right: 0;
+            left: 0;
             display: flex;
             width: 100%;
             justify-content: start;
