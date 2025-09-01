@@ -16,7 +16,7 @@ async function connectToRoom() {
 
   isConnecting.value = true
 
-  const messageDuration = import.meta.env.VITE_ENVIRONMENT === 'development' ? 2 : 1000
+  const messageDuration = import.meta.env.VITE_ENVIRONMENT === 'development' ? 0 : 500
   connectionStatus.value = 'Initializing secure connection...'
   await promiseTimeout(messageDuration)
   connectionStatus.value = 'Authenticating user credentials...'

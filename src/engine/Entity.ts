@@ -1,5 +1,5 @@
 import { Container } from 'pixi.js';
-import { drawPivot } from '../utils/graphics';
+import { drawDebugPoint } from '../utils/graphics';
 
 export class Entity {
   protected container: Container;
@@ -28,6 +28,7 @@ export class Entity {
   setTargetPosition(x: number, y: number): void {
     this.targetX = x;
     this.targetY = y;
+    // drawDebugPoint(this.container.parent, x, y)
   }
 
   setPosition(x: number, y: number): void {
