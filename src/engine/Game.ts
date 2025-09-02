@@ -154,7 +154,6 @@ export class Game {
     if (mapVertices.length >= 2) {
       this.mapPolygon.moveTo(mapVertices[0], mapVertices[1])
 
-      // Add each vertex to the polygon
       for (let i = 2; i < mapVertices.length; i += 2) {
         if (i + 1 < mapVertices.length) {
           this.mapPolygon.lineTo(mapVertices[i], mapVertices[i + 1])
@@ -162,11 +161,9 @@ export class Game {
         }
       }
 
-      // Close the polygon
       this.mapPolygon.lineTo(mapVertices[0], mapVertices[1])
+      this.mapPolygon.stroke({ color: 'red', pixelLine: true })
     }
-
-    this.mapPolygon.endFill()
 
     this.worldContainer.addChildAt(this.mapPolygon, 1)
 
