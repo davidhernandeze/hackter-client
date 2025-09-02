@@ -94,6 +94,7 @@ export class Game {
     }
 
     this.worldContainer.addChild(this.gridGraphics)
+    this.worldContainer.scale.set(this.cameraZoom)
   }
 
   startGameLoop(): void {
