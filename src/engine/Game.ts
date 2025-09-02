@@ -1,4 +1,4 @@
-import { Application, Container, Graphics, Text } from 'pixi.js'
+import { Application, Container, Graphics, GraphicsPath, Text } from 'pixi.js'
 import { Player } from './Player'
 import Colyseus from 'colyseus.js'
 
@@ -138,9 +138,6 @@ export class Game {
     // Apply smooth movement using lerp (linear interpolation)
     this.worldContainer.x = this.worldContainer.x + (targetX - this.worldContainer.x) * 0.1
     this.worldContainer.y = this.worldContainer.y + (targetY - this.worldContainer.y) * 0.1
-
-    // Apply zoom level
-    this.worldContainer.scale.set(this.cameraZoom)
   }
 
   /**
@@ -149,23 +146,29 @@ export class Game {
   private drawMapPolygon(mapVertices: number[]): void {
     if (this.mapPolygon) return
 
-    this.mapPolygon = new Graphics()
+    const mapPath = new GraphicsPath()
 
-    if (mapVertices.length >= 2) {
-      this.mapPolygon.moveTo(mapVertices[0], mapVertices[1])
+    mapPath.moveTo(mapVertices[0], mapVertices[1])
 
-      for (let i = 2; i < mapVertices.length; i += 2) {
-        if (i + 1 < mapVertices.length) {
-          this.mapPolygon.lineTo(mapVertices[i], mapVertices[i + 1])
-          this.mapPolygon.stroke({ color: 'red', pixelLine: true })
-        }
+    for (let i = 2; i < mapVertices.length; i += 2) {
+      if (i + 1 < mapVertices.length) {
+        mapPath.lineTo(mapVertices[i], mapVertices[i + 1])
       }
-
-      this.mapPolygon.lineTo(mapVertices[0], mapVertices[1])
-      this.mapPolygon.stroke({ color: 'red', pixelLine: true })
     }
 
+    mapPath.lineTo(mapVertices[0], mapVertices[1])
+    mapPath.closePath()
+
+    this.mapPolygon = new Graphics()
+    this.mapPolygon.path(mapPath)
+    this.mapPolygon.stroke({ color: 'red', width: 0.2 })
+
+    const mapPolygonBackground = new Graphics()
+    mapPolygonBackground.path(mapPath)
+    mapPolygonBackground.fill({ color: 'rgba(255,255,255,0.06)' })
+
     this.worldContainer.addChildAt(this.mapPolygon, 1)
+    this.worldContainer.addChildAt(mapPolygonBackground, 2)
 
     const adviceText = new Text({
       text: 'Do not touch the walls!',
@@ -265,13 +268,9 @@ export class Game {
     return this.isCurrentPlayerDeleted
   }
 
-  /**
-   * Set camera zoom level
-   * @param zoom - Zoom level (1.0 is normal, >1 zooms in, <1 zooms out)
-   */
   setCameraZoom(zoom: number): void {
-    // Ensure zoom is within reasonable limits
     this.cameraZoom = Math.max(0.1, Math.min(zoom, 10.0))
+    this.worldContainer.scale.set(this.cameraZoom)
   }
 
   /**
