@@ -149,7 +149,9 @@ const typingEffect = ref(false)
             <li>down</li>
             <li>left</li>
             <li>right</li>
+            <li>stop</li>
             <li>print {text}</li>
+            <li>clear</li>
             <li>zoom in</li>
             <li>zoom out</li>
           </ul>

@@ -54,12 +54,14 @@ export class Player extends Entity {
         fontSize: 1.5,
         fill: 0x34ffff,
         wordWrap: true,
+        wordWrapWidth: 10,
+        breakWords: true
       },
       resolution: 10
     })
     this.messageText.pivot.set(0, 0)
     this.messageText.x = 3
-    this.messageText.y = -1
+    this.messageText.y = -2.5
     this.container.addChild(this.messageText)
   }
 
