@@ -17,32 +17,29 @@ const isConnecting = ref(false)
 
 let game = null
 const playerName = useStorage('username', 'anon')
+const reconnectToken = useStorage('reconnectToken', crypto.randomUUID())
 
 onMounted(async () => {
   game = new Game(gameUI.value)
   mainInput.value.focus()
+  await game.initializeApp()
   await connectToRoom()
 })
 
 onUnmounted(() => {
   if (game) {
-    game.destroy()
     game = null
   }
 })
 
 async function connectToRoom() {
   try {
-    await game.connectToServer(import.meta.env.VITE_SERVER_URL, playerName.value)
     game.setCameraZoom(zoomLevels[currentZoomIndex])
-
-    game.onStateChange(() => {
-      if (game.isPlayerDeleted()) {
-        console.log('Player has been deleted from the server.')
-        gameOver.value = true
-        game.destroy()
-        game = null
-      }
+    await game.connectToServer(import.meta.env.VITE_SERVER_URL, playerName.value, reconnectToken.value)
+    game.onPlayerDeleted(() => {
+      console.log('Player has been deleted from the server.')
+      gameOver.value = true
+      game = null
     })
   } catch (error) {
     console.error('Failed to connect to server:', error)

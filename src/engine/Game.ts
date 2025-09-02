@@ -16,7 +16,7 @@ export class Game {
   private room: Colyseus.Room | null = null
   private sessionId: string | null = null
   private animationFrameId: number | null = null
-  private onStateChangeCallback: (() => void) | null = null
+  private onPlayerDeletedCallback: (() => void) | null = null
   private isCurrentPlayerDeleted: boolean = false
   private readonly GRID_SIZE = 10
 
@@ -27,34 +27,28 @@ export class Game {
     this.divContainer = divContainer
   }
 
-  async connectToServer(serverUrl: string, playerName: string): Promise<void> {
+  async connectToServer(serverUrl: string, playerName: string, reconnectToken: string): Promise<void> {
     try {
       const client = new Colyseus.Client(serverUrl)
       this.room = await client.joinOrCreate('arena', {
         name: playerName,
         color: Math.floor(Math.random() * 0xffffff),
+        token: reconnectToken
+      })
+
+      this.room.onStateChange((state) => {
+        this.drawMapPolygon(state.mapVertices)
+        this.updatePlayers(state.players)
+      })
+
+      this.room.onLeave((code) => {
+        console.log('Left the room with code:', code)
+        this.onPlayerDeletedCallback()
       })
 
       console.log('joined successfully', this.room)
       this.sessionId = this.room.sessionId
       console.log('sessionId', this.sessionId)
-
-      await this.initializeApp(this.divContainer)
-      this.sendCommand('start')
-
-      this.room.onStateChange((state) => {
-        if (!this.animationFrameId) {
-          console.log('Game loop started', state.players)
-          this.startGameLoop()
-        }
-        this.drawMapPolygon(state.mapVertices)
-
-        this.updatePlayers(state.players)
-
-        if (this.onStateChangeCallback) {
-          this.onStateChangeCallback()
-        }
-      })
 
       return Promise.resolve()
     } catch (error) {
@@ -63,14 +57,15 @@ export class Game {
     }
   }
 
-  private async initializeApp(divContainer: HTMLDivElement): Promise<void> {
-    await this.app.init({ background: '#1b2e49', resizeTo: divContainer })
-    divContainer.appendChild(this.app.canvas)
+  public async initializeApp(): Promise<void> {
+    await this.app.init({ background: '#1b2e49', resizeTo: this.divContainer })
+    this.divContainer.appendChild(this.app.canvas)
 
     this.worldContainer = new Container()
     this.app.stage.addChild(this.worldContainer)
 
     this.createGrid()
+    this.startGameLoop()
   }
 
   private createGrid(): void {
@@ -104,7 +99,7 @@ export class Game {
 
     const updateFrame = () => {
       for (const player of this.players.values()) {
-        player.update(0, 0.2) // Small number target point is far from sprite center
+        player.update(0, 0.25) // Small number target point is far from sprite center
       }
 
       this.updateCamera()
@@ -169,12 +164,10 @@ export class Game {
 
       // Close the polygon
       this.mapPolygon.lineTo(mapVertices[0], mapVertices[1])
-      this.gridGraphics.stroke({ color: 'red', width: 1 })
     }
 
     this.mapPolygon.endFill()
 
-    // Add the polygon to the world container (after grid but before players)
     this.worldContainer.addChildAt(this.mapPolygon, 1)
 
     const adviceText = new Text({
@@ -192,20 +185,11 @@ export class Game {
     this.worldContainer.addChild(adviceText)
   }
 
-  /**
-   * Update players based on server state
-   */
   private updatePlayers(serverPlayers: any): void {
-    // Remove players that no longer exist
     for (const [id, player] of this.players) {
       if (!serverPlayers.has(id)) {
         this.worldContainer.removeChild(player.getContainer())
         this.players.delete(id)
-
-        // Check if the deleted player is the current player
-        if (id === this.sessionId) {
-          this.isCurrentPlayerDeleted = true
-        }
       }
     }
 
@@ -243,7 +227,7 @@ export class Game {
   /**
    * Send a command to the server
    */
-  sendCommand(command: string): void {
+  public sendCommand(command: string): void {
     if (this.room) {
       this.room.send('command', command)
     }
@@ -252,8 +236,8 @@ export class Game {
   /**
    * Set callback for game state changes
    */
-  onStateChange(callback: () => void): void {
-    this.onStateChangeCallback = callback
+  onPlayerDeleted(callback: () => void): void {
+    this.onPlayerDeletedCallback = callback
   }
 
   /**
@@ -298,42 +282,5 @@ export class Game {
    */
   getCameraZoom(): number {
     return this.cameraZoom
-  }
-
-  /**
-   * Clean up resources
-   */
-  destroy(): void {
-    this.stopGameLoop()
-
-    // Disconnect from server
-    if (this.room) {
-      this.room.leave()
-      this.room = null
-    }
-
-    // Clear players
-    this.players.clear()
-
-    // Clean up grid graphics
-    if (this.gridGraphics) {
-      if (this.gridGraphics.parent) {
-        this.gridGraphics.parent.removeChild(this.gridGraphics)
-      }
-      this.gridGraphics = null
-    }
-
-    // Clean up map polygon
-    if (this.mapPolygon) {
-      if (this.mapPolygon.parent) {
-        this.mapPolygon.parent.removeChild(this.mapPolygon)
-      }
-      this.mapPolygon = null
-    }
-
-    // Remove world container
-    if (this.worldContainer.parent) {
-      this.worldContainer.parent.removeChild(this.worldContainer)
-    }
   }
 }
