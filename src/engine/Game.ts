@@ -41,10 +41,11 @@ export class Game {
 
       const $ = getStateCallbacks(this.room)
       $(this.room.state).players.onAdd((player, sessionId) => {
+        console.log('Player added:', player)
         this.addPlayer(sessionId)
         this.drawMapPolygon(this.room.state.mapVertices)
       })
-      $(this.room.state).players.onRemove((player, sessionId) => {
+      $(this.room.state).players.onRemove((_, sessionId) => {
         this.removePlayer(sessionId)
       })
 
@@ -67,6 +68,7 @@ export class Game {
   }
 
   updateState() {
+    // console.log('State updated:', this.room?.state)
     this.updatePlayers()
   }
 
@@ -225,8 +227,17 @@ export class Game {
   private updatePlayers(): void {
     for (const [id, serverPlayer] of this.room.state.players) {
       if (!serverPlayer.x) return
+      if (serverPlayer.invisible && this.sessionId !== id) {
+        this.removePlayer(id)
+        continue
+      }
 
       const player = this.players.get(id)!
+
+      if (this.sessionId === id) {
+        player.setTransparency(serverPlayer.invisible ? 0.3 : 1.0)
+      }
+
       player.setTargetPosition(serverPlayer.x, serverPlayer.y)
 
       if (this.debugMode && this.sessionId === id) {

@@ -100,4 +100,8 @@ export class Player extends Entity {
   getId(): string {
     return this.getMeta('id') as string
   }
+
+  public setTransparency(alpha: number): void {
+    this.container.alpha = alpha
+  }
 }

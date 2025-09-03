@@ -157,6 +157,7 @@ const typingEffect = ref(false)
             <li>clear</li>
             <li>zoom in</li>
             <li>zoom out</li>
+            <li>camo</li>
           </ul>
         </div>
       </Window>
