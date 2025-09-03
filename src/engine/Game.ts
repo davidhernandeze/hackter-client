@@ -1,12 +1,8 @@
 import { Application, Container, Graphics, GraphicsPath, Text } from 'pixi.js'
 import { Player } from './Player'
 import Colyseus from 'colyseus.js'
-import { drawDebugPoint } from '../utils/graphics'
+import { drawDebugPoint, drawDebugCircle } from '../utils/graphics'
 
-/**
- * Game class that encapsulates game logic
- * Manages players, game state, and rendering
- */
 export class Game {
   private app: Application
   private readonly divContainer: HTMLDivElement
@@ -20,7 +16,7 @@ export class Game {
   private onPlayerDeletedCallback: (() => void) | null = null
   private isCurrentPlayerDeleted: boolean = false
   private readonly GRID_SIZE = 10
-  private debugMode: boolean = false
+  public debugMode: boolean = false
   private movementLerp: number = 0.1
 
   private cameraZoom: number = 5
@@ -30,13 +26,17 @@ export class Game {
     this.divContainer = divContainer
   }
 
-  async connectToServer(serverUrl: string, playerName: string, reconnectToken: string): Promise<void> {
+  async connectToServer(
+    serverUrl: string,
+    playerName: string,
+    reconnectToken: string,
+  ): Promise<void> {
     try {
       const client = new Colyseus.Client(serverUrl)
       this.room = await client.joinOrCreate('arena', {
         name: playerName,
         color: Math.floor(Math.random() * 0xffffff),
-        token: reconnectToken
+        token: reconnectToken,
       })
 
       this.room.onStateChange((state) => {
@@ -182,9 +182,9 @@ export class Game {
         fontFamily: 'Arial',
         fontSize: 6,
         fill: 'rgba(255,255,255,0.07)',
-        wordWrap: true
+        wordWrap: true,
       },
-      resolution: 10
+      resolution: 10,
     })
     adviceText.x = 20
     adviceText.y = 20
@@ -193,7 +193,8 @@ export class Game {
 
   private updatePlayers(serverPlayers: any): void {
     for (const [id, player] of this.players) {
-      if (!serverPlayers.has(id)) {
+      const serverPlayer = serverPlayers.get(id)
+      if (!serverPlayer?.x) {
         this.worldContainer.removeChild(player.getContainer())
         this.players.delete(id)
       }
@@ -201,8 +202,8 @@ export class Game {
 
     // Update existing players and add new ones
     for (const [id, serverPlayer] of serverPlayers) {
+      if (!serverPlayer.x) return
       if (!this.players.has(id)) {
-        // Create new player
         const player = new Player(
           id,
           serverPlayer.name,
@@ -211,16 +212,23 @@ export class Game {
           serverPlayer.y,
         )
 
-        // Add player container to world
         this.worldContainer.addChild(player.getContainer())
 
-        // Add player to map
         this.players.set(id, player)
       } else {
         const player = this.players.get(id)!
 
         player.setTargetPosition(serverPlayer.x, serverPlayer.y)
-        if (this.debugMode) drawDebugPoint(this.worldContainer, serverPlayer.x, serverPlayer.y)
+
+        if (this.debugMode && this.sessionId === id) {
+          drawDebugPoint(this.worldContainer, serverPlayer.x, serverPlayer.y)
+          drawDebugCircle(
+            this.worldContainer,
+            serverPlayer.x,
+            serverPlayer.y,
+            serverPlayer.renderDistance,
+          )
+        }
 
         player.setMessage(serverPlayer.message || '')
       }

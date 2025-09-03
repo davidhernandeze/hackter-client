@@ -20,3 +20,15 @@ export function drawDebugPoint(container, x, y) {
   lastDebugPoint.x = x
   lastDebugPoint.y = y
 }
+
+let lastDebugCircle = null
+export function drawDebugCircle(container, x, y, radius) {
+  if (!lastDebugCircle) {
+    lastDebugCircle = new Graphics()
+    container.addChild(lastDebugCircle)
+    lastDebugCircle.circle(0, 0, radius)
+    lastDebugCircle.stroke({ color: 'red', pixelLine: true, width: 1 })
+  }
+  lastDebugCircle.x = x
+  lastDebugCircle.y = y
+}

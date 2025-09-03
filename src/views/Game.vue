@@ -47,38 +47,35 @@ async function connectToRoom() {
   }
 }
 
-const zoomLevels = [6, 7, 8]
+const zoomLevels = [1, 6, 7, 8]
 let currentZoomIndex = 1
 
 function handleCommand() {
   if (!game) return
   const cmd = command.value.toLowerCase().trim()
+  command.value = ''
 
   if (cmd === 'zoom in') {
     if (currentZoomIndex < zoomLevels.length - 1) {
       currentZoomIndex++
     }
     game.setCameraZoom(zoomLevels[currentZoomIndex])
-    command.value = ''
     return
   } else if (cmd === 'zoom out') {
     if (currentZoomIndex > 0) {
+      if (currentZoomIndex === 1 && !game.debugMode) return
       currentZoomIndex--
     }
     game.setCameraZoom(zoomLevels[currentZoomIndex])
-    command.value = ''
     return
   } else if (cmd === 'debug') {
     game.toggleDebugMode()
-    command.value = ''
     return
   } else if (cmd.startsWith('lerp')) {
     game.setLerp(cmd.split(' ')[1])
-    command.value = ''
     return
   }
-  game.sendCommand(command.value)
-  command.value = ''
+  game.sendCommand(cmd)
 }
 
 function backToLogin() {
