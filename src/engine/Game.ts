@@ -138,6 +138,9 @@ export class Game {
     // Apply smooth movement using lerp (linear interpolation)
     this.worldContainer.x = this.worldContainer.x + (targetX - this.worldContainer.x) * 0.1
     this.worldContainer.y = this.worldContainer.y + (targetY - this.worldContainer.y) * 0.1
+
+    this.gridGraphics.x = this.worldContainer.x * 0.05
+    this.gridGraphics.y = this.worldContainer.y * 0.05
   }
 
   /**
