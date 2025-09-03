@@ -68,7 +68,7 @@ export class Game {
   }
 
   updateState() {
-    // console.log('State updated:', this.room?.state)
+    console.log('State updated:', this.room?.state)
     this.updatePlayers()
   }
 
@@ -225,6 +225,12 @@ export class Game {
   }
 
   private updatePlayers(): void {
+    for (const [id, _] of this.players.values()) {
+      if (!this.room.state.players.has(id)) {
+        this.removePlayer(id)
+      }
+    }
+
     for (const [id, serverPlayer] of this.room.state.players) {
       if (!serverPlayer.x) return
       if (serverPlayer.invisible && this.sessionId !== id) {
