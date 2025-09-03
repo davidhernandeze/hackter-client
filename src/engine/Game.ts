@@ -225,7 +225,7 @@ export class Game {
   }
 
   private updatePlayers(): void {
-    for (const [id, _] of this.players.values()) {
+    for (const [id, _] of this.players) {
       if (!this.room.state.players.has(id)) {
         this.removePlayer(id)
       }
