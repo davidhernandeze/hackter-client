@@ -4,7 +4,7 @@ import { RouterView } from 'vue-router'
 
 <template>
   <RouterView />
-  <span style="position: fixed; bottom: 1rem; right: 1rem; color: #3a3a3a">0.6</span>
+  <span style="position: fixed; bottom: 1rem; right: 1rem; color: #3a3a3a">0.7</span>
 </template>
 
 <style>

@@ -1,6 +1,6 @@
 import { Application, Container, Graphics, GraphicsPath, Text } from 'pixi.js'
 import { Player } from './Player'
-import Colyseus from 'colyseus.js'
+import Colyseus, { getStateCallbacks } from 'colyseus.js'
 import { drawDebugPoint, drawDebugCircle } from '../utils/graphics'
 
 export class Game {
@@ -39,10 +39,16 @@ export class Game {
         token: reconnectToken,
       })
 
-      this.room.onStateChange((state) => {
-        this.drawMapPolygon(state.mapVertices)
-        this.updatePlayers(state.players)
+      const $ = getStateCallbacks(this.room)
+      $(this.room.state).players.onAdd((player, sessionId) => {
+        this.addPlayer(sessionId)
+        this.drawMapPolygon(this.room.state.mapVertices)
       })
+      $(this.room.state).players.onRemove((player, sessionId) => {
+        this.removePlayer(sessionId)
+      })
+
+      this.room.onStateChange(() => this.updateState())
 
       this.room.onLeave((code) => {
         console.log('Left the room with code:', code)
@@ -58,6 +64,10 @@ export class Game {
       console.error('Failed to connect to server:', error)
       return Promise.reject(error)
     }
+  }
+
+  updateState() {
+    this.updatePlayers()
   }
 
   public async initializeApp(): Promise<void> {
@@ -113,19 +123,13 @@ export class Game {
     this.animationFrameId = requestAnimationFrame(updateFrame)
   }
 
-  /**
-   * Stop the game loop
-   */
-  stopGameLoop(): void {
+  public stopGameLoop(): void {
     if (this.animationFrameId !== null) {
       cancelAnimationFrame(this.animationFrameId)
       this.animationFrameId = null
     }
   }
 
-  /**
-   * Update camera position to follow current player
-   */
   private updateCamera(): void {
     if (!this.sessionId || !this.players.has(this.sessionId)) return
     const currentPlayer = this.players.get(this.sessionId)!
@@ -146,9 +150,6 @@ export class Game {
     this.gridGraphics.y = this.worldContainer.y * 0.05
   }
 
-  /**
-   * Draw map polygon from vertices
-   */
   private drawMapPolygon(mapVertices: number[]): void {
     if (this.mapPolygon) return
 
@@ -191,53 +192,57 @@ export class Game {
     this.worldContainer.addChild(adviceText)
   }
 
-  private updatePlayers(serverPlayers: any): void {
-    for (const [id, player] of this.players) {
-      const serverPlayer = serverPlayers.get(id)
-      if (!serverPlayer?.x) {
-        this.worldContainer.removeChild(player.getContainer())
-        this.players.delete(id)
-      }
-    }
+  addPlayer(sessionId: string): void {
+    const serverPlayer = this.room.state.players.get(sessionId)
+    if (!serverPlayer) return
 
-    // Update existing players and add new ones
-    for (const [id, serverPlayer] of serverPlayers) {
-      if (!serverPlayer.x) return
-      if (!this.players.has(id)) {
-        const player = new Player(
-          id,
-          serverPlayer.name,
-          serverPlayer.color,
-          serverPlayer.x,
-          serverPlayer.y,
-        )
+    const player = new Player(
+      sessionId,
+      serverPlayer.name,
+      serverPlayer.color,
+      serverPlayer.x,
+      serverPlayer.y,
+    )
+    this.worldContainer.addChild(player.getContainer())
 
-        this.worldContainer.addChild(player.getContainer())
+    this.players.set(sessionId, player)
+  }
 
-        this.players.set(id, player)
-      } else {
-        const player = this.players.get(id)!
+  removePlayer(sessionId: string): void {
+    const player = this.players.get(sessionId)
+    if (!player) return
+    this.worldContainer.removeChild(player.getContainer())
+    this.players.delete(sessionId)
 
-        player.setTargetPosition(serverPlayer.x, serverPlayer.y)
-
-        if (this.debugMode && this.sessionId === id) {
-          drawDebugPoint(this.worldContainer, serverPlayer.x, serverPlayer.y)
-          drawDebugCircle(
-            this.worldContainer,
-            serverPlayer.x,
-            serverPlayer.y,
-            serverPlayer.renderDistance,
-          )
-        }
-
-        player.setMessage(serverPlayer.message || '')
+    if (this.sessionId === sessionId) {
+      this.isCurrentPlayerDeleted = true
+      if (this.onPlayerDeletedCallback) {
+        this.onPlayerDeletedCallback()
       }
     }
   }
 
-  /**
-   * Send a command to the server
-   */
+  private updatePlayers(): void {
+    for (const [id, serverPlayer] of this.room.state.players) {
+      if (!serverPlayer.x) return
+
+      const player = this.players.get(id)!
+      player.setTargetPosition(serverPlayer.x, serverPlayer.y)
+
+      if (this.debugMode && this.sessionId === id) {
+        drawDebugPoint(this.worldContainer, serverPlayer.x, serverPlayer.y)
+        drawDebugCircle(
+          this.worldContainer,
+          serverPlayer.x,
+          serverPlayer.y,
+          serverPlayer.renderDistance,
+        )
+      }
+
+      player.setMessage(serverPlayer.message || '')
+    }
+  }
+
   public sendCommand(command: string): void {
     if (this.room) {
       this.room.send('command', command)

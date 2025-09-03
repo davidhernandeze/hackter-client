@@ -28,6 +28,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
   if (game) {
+    game.stopGameLoop()
     game = null
   }
 })
