@@ -164,7 +164,7 @@ export class Game {
 
     this.mapPolygon = new Graphics()
     this.mapPolygon.path(mapPath)
-    this.mapPolygon.stroke({ color: 'red', width: 0.2 })
+    this.mapPolygon.stroke({ color: 'red', width: 0.2, pixelLine: true })
 
     const mapPolygonBackground = new Graphics()
     mapPolygonBackground.path(mapPath)
