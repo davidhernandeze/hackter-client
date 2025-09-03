@@ -1,6 +1,7 @@
 import { Application, Container, Graphics, GraphicsPath, Text } from 'pixi.js'
 import { Player } from './Player'
 import Colyseus from 'colyseus.js'
+import { drawDebugPoint } from '../utils/graphics'
 
 /**
  * Game class that encapsulates game logic
@@ -19,6 +20,8 @@ export class Game {
   private onPlayerDeletedCallback: (() => void) | null = null
   private isCurrentPlayerDeleted: boolean = false
   private readonly GRID_SIZE = 10
+  private debugMode: boolean = false
+  private movementLerp: number = 0.1
 
   private cameraZoom: number = 5
 
@@ -99,7 +102,7 @@ export class Game {
 
     const updateFrame = () => {
       for (const player of this.players.values()) {
-        player.update(0, 0.25) // Small number target point is far from sprite center
+        player.update(0, this.movementLerp) // Small number target point is far from sprite center
       }
 
       this.updateCamera()
@@ -214,14 +217,11 @@ export class Game {
         // Add player to map
         this.players.set(id, player)
       } else {
-        // Update existing player
         const player = this.players.get(id)!
 
-        // Update target position for smooth movement
         player.setTargetPosition(serverPlayer.x, serverPlayer.y)
+        if (this.debugMode) drawDebugPoint(this.worldContainer, serverPlayer.x, serverPlayer.y)
 
-
-        // Update message directly
         player.setMessage(serverPlayer.message || '')
       }
     }
@@ -281,5 +281,13 @@ export class Game {
    */
   getCameraZoom(): number {
     return this.cameraZoom
+  }
+
+  public toggleDebugMode(): void {
+    this.debugMode = !this.debugMode
+  }
+
+  public setLerp(lerp: number): void {
+    this.movementLerp = lerp
   }
 }

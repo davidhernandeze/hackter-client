@@ -1,5 +1,5 @@
 import { Container } from 'pixi.js';
-import { drawDebugPoint } from '../utils/graphics';
+import { drawDebugPoint } from '../utils/graphics'
 
 export class Entity {
   protected container: Container;

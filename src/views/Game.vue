@@ -68,6 +68,14 @@ function handleCommand() {
     game.setCameraZoom(zoomLevels[currentZoomIndex])
     command.value = ''
     return
+  } else if (cmd === 'debug') {
+    game.toggleDebugMode()
+    command.value = ''
+    return
+  } else if (cmd.startsWith('lerp')) {
+    game.setLerp(cmd.split(' ')[1])
+    command.value = ''
+    return
   }
   game.sendCommand(command.value)
   command.value = ''
