@@ -68,7 +68,7 @@ export class Game {
   }
 
   updateState() {
-    console.log('State updated:', this.room?.state)
+    // console.log('State updated:', this.room?.state)
     this.updatePlayers()
   }
 
