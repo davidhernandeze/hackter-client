@@ -182,7 +182,7 @@ export class Game {
     const adviceText = new Text({
       text: 'Do not touch the walls!',
       style: {
-        fontFamily: 'Arial',
+        fontFamily: 'Courier New',
         fontSize: 6,
         fill: 'rgba(255,255,255,0.07)',
         wordWrap: true,

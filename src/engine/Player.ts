@@ -36,8 +36,8 @@ export class Player extends Entity {
     this.nameText = new Text({
       text: this.name,
       style: {
-        fontFamily: 'Arial',
-        fontSize: 2,
+        fontFamily: 'Courier New',
+        fontSize: 2.2,
         fill: 0xffffff
       },
       resolution: 10
@@ -50,8 +50,8 @@ export class Player extends Entity {
     this.messageText = new Text({
       text: '',
       style: {
-        fontFamily: 'Arial',
-        fontSize: 1.5,
+        fontFamily: 'Courier New',
+        fontSize: 1.8,
         fill: 0x34ffff,
         wordWrap: true,
         wordWrapWidth: 10,
